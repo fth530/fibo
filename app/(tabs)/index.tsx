@@ -1,50 +1,88 @@
-import React, { useRef } from 'react';
+import React, { useEffect } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   Pressable,
   Platform,
-  Animated as RNAnimated,
 } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSequence,
+  withTiming,
+  withSpring,
+} from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { GameBoard } from '@/components/GameBoard';
 import { useFibonacciGame } from '@/hooks/useFibonacciGame';
+import { useBestScore } from '@/hooks/useBestScore';
+
 import { GameColors } from '@/constants/colors';
 import type { Direction } from '@/hooks/useFibonacciGame';
 
 export default function GameScreen() {
   const insets = useSafeAreaInsets();
   const { tiles, score, gameOver, swipe, restart } = useFibonacciGame();
-  const shakeAnim = useRef(new RNAnimated.Value(0)).current;
+  const bestScore = useBestScore(score);
 
   const topInset = Platform.OS === 'web' ? 67 : insets.top;
   const bottomInset = Platform.OS === 'web' ? 34 : insets.bottom;
 
+  const scoreShake = useSharedValue(0);
+  const boardShake = useSharedValue(0);
+  const scoreScale = useSharedValue(1);
+
+  const scoreAnimStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: scoreShake.value },
+      { scale: scoreScale.value },
+    ],
+  }));
+
+  const boardShakeStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: boardShake.value }],
+  }));
+
+  useEffect(() => {
+    if (score > 0) {
+      scoreShake.value = withSequence(
+        withTiming(7, { duration: 55 }),
+        withTiming(-7, { duration: 55 }),
+        withTiming(4, { duration: 45 }),
+        withTiming(0, { duration: 40 })
+      );
+      scoreScale.value = withSequence(
+        withTiming(1.12, { duration: 80 }),
+        withSpring(1, { damping: 14, stiffness: 340 })
+      );
+    }
+  }, [score]);
+
   const handleSwipe = (dir: Direction) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    swipe(dir);
+    const result = swipe(dir);
+    if (!result.changed) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      boardShake.value = withSequence(
+        withTiming(-10, { duration: 55 }),
+        withTiming(10, { duration: 55 }),
+        withTiming(-6, { duration: 45 }),
+        withTiming(6, { duration: 45 }),
+        withTiming(0, { duration: 35 })
+      );
+    } else if (result.merged) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    } else {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
   };
 
   const handleRestart = () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     restart();
   };
-
-  const shakeScore = () => {
-    RNAnimated.sequence([
-      RNAnimated.timing(shakeAnim, { toValue: 6, duration: 60, useNativeDriver: true }),
-      RNAnimated.timing(shakeAnim, { toValue: -6, duration: 60, useNativeDriver: true }),
-      RNAnimated.timing(shakeAnim, { toValue: 4, duration: 50, useNativeDriver: true }),
-      RNAnimated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
-    ]).start();
-  };
-
-  React.useEffect(() => {
-    if (score > 0) shakeScore();
-  }, [score]);
 
   return (
     <View
@@ -60,12 +98,15 @@ export default function GameScreen() {
         </View>
 
         <View style={styles.headerRight}>
-          <RNAnimated.View
-            style={[styles.scoreCard, { transform: [{ translateX: shakeAnim }] }]}
-          >
+          <Animated.View style={[styles.scoreCard, scoreAnimStyle]}>
             <Text style={styles.scoreLabel}>SCORE</Text>
             <Text style={styles.scoreValue}>{score}</Text>
-          </RNAnimated.View>
+          </Animated.View>
+
+          <View style={styles.scoreCard}>
+            <Text style={styles.scoreLabel}>BEST</Text>
+            <Text style={styles.scoreValue}>{bestScore}</Text>
+          </View>
 
           <Pressable
             onPress={handleRestart}
@@ -79,13 +120,13 @@ export default function GameScreen() {
         </View>
       </View>
 
-      <View style={styles.boardWrapper}>
+      <Animated.View style={[styles.boardWrapper, boardShakeStyle]}>
         <GameBoard tiles={tiles} onSwipe={handleSwipe} />
-      </View>
+      </Animated.View>
 
       <View style={styles.hintRow}>
         <Text style={styles.hintText}>
-          1+1=2 &nbsp;·&nbsp; 2+3=5 &nbsp;·&nbsp; 3+5=8
+          {'1+1=2  ·  2+3=5  ·  3+5=8'}
         </Text>
       </View>
 
@@ -93,7 +134,10 @@ export default function GameScreen() {
         <View style={styles.overlay}>
           <View style={styles.gameOverCard}>
             <Text style={styles.gameOverTitle}>Game Over</Text>
-            <Text style={styles.gameOverScore}>Score: {score}</Text>
+            <Text style={styles.gameOverScore}>Score  {score}</Text>
+            {score >= bestScore && score > 0 && (
+              <Text style={styles.newBestLabel}>New Best!</Text>
+            )}
             <Pressable
               onPress={handleRestart}
               style={({ pressed }) => [
@@ -109,6 +153,25 @@ export default function GameScreen() {
     </View>
   );
 }
+
+const scoreCardBase = {
+  backgroundColor: GameColors.scoreCard,
+  borderRadius: 14,
+  paddingHorizontal: 14,
+  paddingVertical: 8,
+  alignItems: 'center' as const,
+  minWidth: 64,
+  ...Platform.select({
+    ios: {
+      shadowColor: 'rgba(44,36,32,0.10)',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+    },
+    android: { elevation: 3 },
+    web: { boxShadow: '0px 2px 8px rgba(44,36,32,0.10)' },
+  }),
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -143,28 +206,9 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
-  scoreCard: {
-    backgroundColor: GameColors.scoreCard,
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    alignItems: 'center',
-    minWidth: 72,
-    ...Platform.select({
-      ios: {
-        shadowColor: 'rgba(44,36,32,0.10)',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 1,
-        shadowRadius: 8,
-      },
-      android: { elevation: 3 },
-      web: {
-        boxShadow: '0px 2px 8px rgba(44,36,32,0.10)',
-      },
-    }),
-  },
+  scoreCard: scoreCardBase,
   scoreLabel: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 9,
@@ -173,7 +217,7 @@ const styles = StyleSheet.create({
   },
   scoreValue: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 22,
+    fontSize: 20,
     color: GameColors.textPrimary,
     letterSpacing: -0.5,
   },
@@ -203,7 +247,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(250,247,242,0.88)',
+    backgroundColor: 'rgba(250,247,242,0.90)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -213,7 +257,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 36,
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     ...Platform.select({
       ios: {
         shadowColor: 'rgba(44,36,32,0.14)',
@@ -222,9 +266,7 @@ const styles = StyleSheet.create({
         shadowRadius: 28,
       },
       android: { elevation: 10 },
-      web: {
-        boxShadow: '0px 10px 28px rgba(44,36,32,0.14)',
-      },
+      web: { boxShadow: '0px 10px 28px rgba(44,36,32,0.14)' },
     }),
   },
   gameOverTitle: {
@@ -237,14 +279,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     fontSize: 16,
     color: GameColors.textSecondary,
-    marginBottom: 8,
+  },
+  newBestLabel: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    color: '#FF8C50',
+    letterSpacing: 0.5,
+    marginBottom: 4,
   },
   playAgainBtn: {
     backgroundColor: GameColors.restartBtn,
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 14,
-    marginTop: 4,
+    marginTop: 8,
   },
   playAgainText: {
     fontFamily: 'Inter_600SemiBold',

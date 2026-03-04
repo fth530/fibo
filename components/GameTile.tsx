@@ -34,21 +34,22 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
   const scale = useSharedValue(tile.isNew ? 0 : 1);
 
   useEffect(() => {
-    translateX.value = withSpring(targetX, { damping: 22, stiffness: 380 });
-    translateY.value = withSpring(targetY, { damping: 22, stiffness: 380 });
+    translateX.value = withSpring(targetX, { damping: 20, stiffness: 400, mass: 0.8 });
+    translateY.value = withSpring(targetY, { damping: 20, stiffness: 400, mass: 0.8 });
   }, [targetX, targetY]);
 
   useEffect(() => {
     if (tile.isNew) {
-      scale.value = withSpring(1, { damping: 14, stiffness: 360 });
+      scale.value = withSpring(1, { damping: 12, stiffness: 300 });
     }
   }, [tile.isNew]);
 
   useEffect(() => {
     if (tile.isMerged) {
       scale.value = withSequence(
-        withTiming(1.18, { duration: 90 }),
-        withSpring(1, { damping: 14, stiffness: 400 })
+        withTiming(0, { duration: 0 }),
+        withTiming(1.28, { duration: 100 }),
+        withSpring(1, { damping: 10, stiffness: 360 })
       );
     }
   }, [tile.isMerged]);
@@ -65,9 +66,14 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
   }));
 
   const shadowStyle = Platform.select({
-    ios: { shadowColor: tileStyle.shadow },
+    ios: {
+      shadowColor: tileStyle.shadow,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 1,
+      shadowRadius: 8,
+    },
     android: {},
-    web: { boxShadow: `0px 4px 8px ${tileStyle.shadow}` },
+    web: { boxShadow: `0px 4px 10px ${tileStyle.shadow}` },
   });
 
   return (
@@ -107,9 +113,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 8,
     elevation: 4,
   },
   value: {
