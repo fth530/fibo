@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -17,9 +17,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { GameBoard } from '@/components/GameBoard';
+import { HowToPlayModal } from '@/components/HowToPlayModal';
+import { GameOverOverlay } from '@/components/GameOverOverlay';
 import { useFibonacciGame } from '@/hooks/useFibonacciGame';
 import { useBestScore } from '@/hooks/useBestScore';
-
 import { GameColors } from '@/constants/colors';
 import type { Direction } from '@/hooks/useFibonacciGame';
 
@@ -27,6 +28,7 @@ export default function GameScreen() {
   const insets = useSafeAreaInsets();
   const { tiles, score, gameOver, swipe, restart } = useFibonacciGame();
   const bestScore = useBestScore(score);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const topInset = Platform.OS === 'web' ? 67 : insets.top;
   const bottomInset = Platform.OS === 'web' ? 34 : insets.bottom;
@@ -84,6 +86,11 @@ export default function GameScreen() {
     restart();
   };
 
+  const handleInfo = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setShowTutorial(true);
+  };
+
   return (
     <View
       style={[
@@ -93,7 +100,7 @@ export default function GameScreen() {
     >
       <View style={styles.header}>
         <View style={styles.titleBlock}>
-          <Text style={styles.title}>fibonacci</Text>
+          <Text style={styles.title}>fibo</Text>
           <Text style={styles.subtitle}>merge consecutive numbers</Text>
         </View>
 
@@ -107,6 +114,16 @@ export default function GameScreen() {
             <Text style={styles.scoreLabel}>BEST</Text>
             <Text style={styles.scoreValue}>{bestScore}</Text>
           </View>
+
+          <Pressable
+            onPress={handleInfo}
+            style={({ pressed }) => [
+              styles.infoBtn,
+              { opacity: pressed ? 0.72 : 1, transform: [{ scale: pressed ? 0.92 : 1 }] },
+            ]}
+          >
+            <Ionicons name="help" size={18} color={GameColors.textSecondary} />
+          </Pressable>
 
           <Pressable
             onPress={handleRestart}
@@ -131,25 +148,17 @@ export default function GameScreen() {
       </View>
 
       {gameOver && (
-        <View style={styles.overlay}>
-          <View style={styles.gameOverCard}>
-            <Text style={styles.gameOverTitle}>Game Over</Text>
-            <Text style={styles.gameOverScore}>Score  {score}</Text>
-            {score >= bestScore && score > 0 && (
-              <Text style={styles.newBestLabel}>New Best!</Text>
-            )}
-            <Pressable
-              onPress={handleRestart}
-              style={({ pressed }) => [
-                styles.playAgainBtn,
-                { opacity: pressed ? 0.85 : 1, transform: [{ scale: pressed ? 0.96 : 1 }] },
-              ]}
-            >
-              <Text style={styles.playAgainText}>Play Again</Text>
-            </Pressable>
-          </View>
-        </View>
+        <GameOverOverlay
+          score={score}
+          bestScore={bestScore}
+          onPlayAgain={handleRestart}
+        />
       )}
+
+      <HowToPlayModal
+        visible={showTutorial}
+        onClose={() => setShowTutorial(false)}
+      />
     </View>
   );
 }
@@ -160,7 +169,7 @@ const scoreCardBase = {
   paddingHorizontal: 14,
   paddingVertical: 8,
   alignItems: 'center' as const,
-  minWidth: 64,
+  minWidth: 60,
   ...Platform.select({
     ios: {
       shadowColor: 'rgba(44,36,32,0.10)',
@@ -181,20 +190,21 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 20,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 18,
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
   },
   titleBlock: {
     gap: 2,
+    justifyContent: 'center',
   },
   title: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 28,
-    letterSpacing: -1,
+    fontSize: 32,
+    letterSpacing: -1.2,
     color: GameColors.textPrimary,
   },
   subtitle: {
@@ -206,7 +216,7 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 7,
   },
   scoreCard: scoreCardBase,
   scoreLabel: {
@@ -221,11 +231,29 @@ const styles = StyleSheet.create({
     color: GameColors.textPrimary,
     letterSpacing: -0.5,
   },
+  infoBtn: {
+    backgroundColor: '#FFFFFF',
+    width: 38,
+    height: 38,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: 'rgba(44,36,32,0.10)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 8,
+      },
+      android: { elevation: 3 },
+      web: { boxShadow: '0px 2px 8px rgba(44,36,32,0.10)' },
+    }),
+  },
   restartBtn: {
     backgroundColor: GameColors.restartBtn,
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+    width: 38,
+    height: 38,
+    borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -236,68 +264,13 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   hintRow: {
-    paddingBottom: 20,
-    paddingTop: 12,
+    paddingBottom: 18,
+    paddingTop: 10,
   },
   hintText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
     color: GameColors.textMuted,
-    letterSpacing: 0.2,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(250,247,242,0.90)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  gameOverCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    paddingHorizontal: 40,
-    paddingVertical: 36,
-    alignItems: 'center',
-    gap: 6,
-    ...Platform.select({
-      ios: {
-        shadowColor: 'rgba(44,36,32,0.14)',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 1,
-        shadowRadius: 28,
-      },
-      android: { elevation: 10 },
-      web: { boxShadow: '0px 10px 28px rgba(44,36,32,0.14)' },
-    }),
-  },
-  gameOverTitle: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 30,
-    color: GameColors.textPrimary,
-    letterSpacing: -0.8,
-  },
-  gameOverScore: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 16,
-    color: GameColors.textSecondary,
-  },
-  newBestLabel: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 13,
-    color: '#FF8C50',
-    letterSpacing: 0.5,
-    marginBottom: 4,
-  },
-  playAgainBtn: {
-    backgroundColor: GameColors.restartBtn,
-    paddingHorizontal: 32,
-    paddingVertical: 14,
-    borderRadius: 14,
-    marginTop: 8,
-  },
-  playAgainText: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 16,
-    color: '#FAF7F2',
     letterSpacing: 0.2,
   },
 });
