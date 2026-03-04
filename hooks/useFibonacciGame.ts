@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useReducer, useCallback } from 'react';
 
 const GRID_SIZE = 4;
 
@@ -21,22 +21,20 @@ const MERGE_MAP = new Map<string, number>([
   ['987,1597', 2584],
 ]);
 
-function mergeKey(a: number, b: number): string {
+export function mergeKey(a: number, b: number): string {
   return a <= b ? `${a},${b}` : `${b},${a}`;
 }
 
-function canMerge(a: number, b: number): boolean {
+export function canMerge(a: number, b: number): boolean {
   return MERGE_MAP.has(mergeKey(a, b));
 }
 
-function mergeResult(a: number, b: number): number {
+export function mergeResult(a: number, b: number): number {
   return MERGE_MAP.get(mergeKey(a, b)) ?? a + b;
 }
 
-let _tileCounter = 0;
 function newId(): string {
-  _tileCounter++;
-  return `t${_tileCounter}-${Date.now().toString(36)}`;
+  return `t${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
 export interface TileData {
@@ -55,13 +53,17 @@ export interface SwipeResult {
   merged: boolean;
 }
 
-function makeGrid(tiles: TileData[]): (TileData | null)[][] {
-  const g: (TileData | null)[][] = Array.from({ length: 4 }, () => Array(4).fill(null));
-  tiles.forEach((t) => { g[t.row][t.col] = t; });
+export function makeGrid(tiles: TileData[]): (TileData | null)[][] {
+  const g: (TileData | null)[][] = Array.from({ length: GRID_SIZE }, () =>
+    Array(GRID_SIZE).fill(null)
+  );
+  tiles.forEach((t) => {
+    g[t.row][t.col] = t;
+  });
   return g;
 }
 
-function processLine(
+export function processLine(
   line: (TileData | null)[]
 ): { result: (TileData | null)[]; score: number; changed: boolean; hadMerge: boolean } {
   const tiles = line.filter(Boolean) as TileData[];
@@ -87,7 +89,7 @@ function processLine(
   }
 
   const padded: (TileData | null)[] = [...out];
-  while (padded.length < 4) padded.push(null);
+  while (padded.length < GRID_SIZE) padded.push(null);
 
   const changed = line.some((t, idx) => {
     const r = padded[idx];
@@ -99,7 +101,7 @@ function processLine(
   return { result: padded, score, changed, hadMerge };
 }
 
-function slideBoard(
+export function slideBoard(
   tiles: TileData[],
   dir: Direction
 ): { newTiles: TileData[]; scoreGained: number; changed: boolean; hadMerge: boolean } {
@@ -107,7 +109,9 @@ function slideBoard(
   let totalScore = 0;
   let anyChanged = false;
   let anyMerge = false;
-  const newGrid: (TileData | null)[][] = Array.from({ length: 4 }, () => Array(4).fill(null));
+  const newGrid: (TileData | null)[][] = Array.from({ length: GRID_SIZE }, () =>
+    Array(GRID_SIZE).fill(null)
+  );
 
   if (dir === 'left' || dir === 'right') {
     for (let r = 0; r < GRID_SIZE; r++) {
@@ -141,7 +145,7 @@ function slideBoard(
   return { newTiles, scoreGained: totalScore, changed: anyChanged, hadMerge: anyMerge };
 }
 
-function spawnOne(tiles: TileData[]): TileData[] {
+export function spawnOne(tiles: TileData[]): TileData[] {
   const occupied = new Set(tiles.map((t) => `${t.row},${t.col}`));
   const empty: { row: number; col: number }[] = [];
   for (let r = 0; r < GRID_SIZE; r++) {
@@ -157,21 +161,23 @@ function spawnOne(tiles: TileData[]): TileData[] {
   ];
 }
 
-function isGameOver(tiles: TileData[]): boolean {
+export function isGameOver(tiles: TileData[]): boolean {
   if (tiles.length < 16) return false;
   const grid = makeGrid(tiles);
   for (let r = 0; r < GRID_SIZE; r++) {
     for (let c = 0; c < GRID_SIZE; c++) {
       const t = grid[r][c];
       if (!t) return false;
-      if (c + 1 < GRID_SIZE && grid[r][c + 1] && canMerge(t.value, grid[r][c + 1]!.value)) return false;
-      if (r + 1 < GRID_SIZE && grid[r + 1][c] && canMerge(t.value, grid[r + 1][c]!.value)) return false;
+      if (c + 1 < GRID_SIZE && grid[r][c + 1] && canMerge(t.value, grid[r][c + 1]!.value))
+        return false;
+      if (r + 1 < GRID_SIZE && grid[r + 1][c] && canMerge(t.value, grid[r + 1][c]!.value))
+        return false;
     }
   }
   return true;
 }
 
-function makeInitialTiles(): TileData[] {
+export function makeInitialTiles(): TileData[] {
   const pool = Array.from({ length: 16 }, (_, i) => i);
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -187,40 +193,72 @@ function makeInitialTiles(): TileData[] {
   }));
 }
 
-export function useFibonacciGame() {
-  const [tiles, setTiles] = useState<TileData[]>(() => makeInitialTiles());
-  const [score, setScore] = useState(0);
-  const [gameOver, setGameOver] = useState(false);
+// ─── Reducer Pattern ────────────────────────────────────────────
 
-  const swipe = useCallback(
-    (dir: Direction): SwipeResult => {
-      if (gameOver) return { changed: false, merged: false };
+export interface GameState {
+  tiles: TileData[];
+  score: number;
+  gameOver: boolean;
+}
 
-      const { newTiles, scoreGained, changed, hadMerge } = slideBoard(tiles, dir);
-      if (!changed) return { changed: false, merged: false };
+type GameAction =
+  | { type: 'SWIPE'; dir: Direction }
+  | { type: 'RESTART' };
+
+export function gameReducer(state: GameState, action: GameAction): GameState {
+  switch (action.type) {
+    case 'SWIPE': {
+      if (state.gameOver) return state;
+
+      const { newTiles, scoreGained, changed } = slideBoard(state.tiles, action.dir);
+      if (!changed) return state;
 
       const cleared = newTiles.map((t) => ({ ...t, isNew: false }));
       const afterSpawn = spawnOne(cleared);
+      const newScore = state.score + scoreGained;
+      const over = isGameOver(afterSpawn);
 
-      setTiles(afterSpawn);
-      if (scoreGained > 0) {
-        setScore((prev) => prev + scoreGained);
-      }
-      if (isGameOver(afterSpawn)) {
-        setGameOver(true);
-      }
+      return { tiles: afterSpawn, score: newScore, gameOver: over };
+    }
 
+    case 'RESTART': {
+      return { tiles: makeInitialTiles(), score: 0, gameOver: false };
+    }
+
+    default:
+      return state;
+  }
+}
+
+function createInitialState(): GameState {
+  return { tiles: makeInitialTiles(), score: 0, gameOver: false };
+}
+
+export function useFibonacciGame() {
+  const [state, dispatch] = useReducer(gameReducer, null, createInitialState);
+
+  const swipe = useCallback(
+    (dir: Direction): SwipeResult => {
+      if (state.gameOver) return { changed: false, merged: false };
+
+      const { changed, hadMerge } = slideBoard(state.tiles, dir);
+      if (!changed) return { changed: false, merged: false };
+
+      dispatch({ type: 'SWIPE', dir });
       return { changed: true, merged: hadMerge };
     },
-    [tiles, gameOver]
+    [state.tiles, state.gameOver]
   );
 
   const restart = useCallback(() => {
-    _tileCounter = 0;
-    setTiles(makeInitialTiles());
-    setScore(0);
-    setGameOver(false);
+    dispatch({ type: 'RESTART' });
   }, []);
 
-  return { tiles, score, gameOver, swipe, restart };
+  return {
+    tiles: state.tiles,
+    score: state.score,
+    gameOver: state.gameOver,
+    swipe,
+    restart,
+  };
 }

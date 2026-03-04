@@ -28,14 +28,8 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      [
-        "expo-router",
-        {
-          "origin": "https://replit.com/"
-        }
-      ],
-      "expo-font",
-      "expo-web-browser"
+      "expo-router",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true,
