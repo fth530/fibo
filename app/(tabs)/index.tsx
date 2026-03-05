@@ -61,7 +61,7 @@ export default function GameScreen() {
         withSpring(1, { damping: 14, stiffness: 340 })
       );
     }
-  }, [score]);
+  }, [score, scoreScale, scoreShake]);
 
   const handleSwipe = (dir: Direction) => {
     const result = swipe(dir);

@@ -73,7 +73,7 @@ export function HowToPlayModal({ visible, onClose }: HowToPlayModalProps) {
       backdropAlpha.value = withTiming(0, { duration: 200 });
       cardY.value = withTiming(600, { duration: 230 });
     }
-  }, [visible]);
+  }, [visible, backdropAlpha, cardY]);
 
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: backdropAlpha.value,

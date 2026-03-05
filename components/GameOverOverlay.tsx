@@ -44,7 +44,7 @@ export function GameOverOverlay({
         )
       );
     }
-  }, []);
+  }, [backdropAlpha, badgeScale, btnScale, cardAlpha, cardScale, isNewBest]);
 
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: backdropAlpha.value,

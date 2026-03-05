@@ -36,13 +36,13 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
   useEffect(() => {
     translateX.value = withSpring(targetX, { damping: 20, stiffness: 400, mass: 0.8 });
     translateY.value = withSpring(targetY, { damping: 20, stiffness: 400, mass: 0.8 });
-  }, [targetX, targetY]);
+  }, [targetX, targetY, translateX, translateY]);
 
   useEffect(() => {
     if (tile.isNew) {
       scale.value = withSpring(1, { damping: 12, stiffness: 300 });
     }
-  }, [tile.isNew]);
+  }, [tile.isNew, scale]);
 
   useEffect(() => {
     if (tile.isMerged) {
@@ -52,7 +52,7 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
         withSpring(1, { damping: 10, stiffness: 360 })
       );
     }
-  }, [tile.isMerged]);
+  }, [tile.isMerged, scale]);
 
   const tileStyle = getTileStyle(tile.value);
   const fontSize = getFontSize(tile.value, cellSize);
