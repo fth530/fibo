@@ -199,11 +199,14 @@ export interface GameState {
   tiles: TileData[];
   score: number;
   gameOver: boolean;
+  previousState: { tiles: TileData[]; score: number } | null;
+  canUndo: boolean;
 }
 
 type GameAction =
   | { type: 'SWIPE'; dir: Direction }
-  | { type: 'RESTART' };
+  | { type: 'RESTART' }
+  | { type: 'UNDO' };
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -218,11 +221,28 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const newScore = state.score + scoreGained;
       const over = isGameOver(afterSpawn);
 
-      return { tiles: afterSpawn, score: newScore, gameOver: over };
+      return {
+        tiles: afterSpawn,
+        score: newScore,
+        gameOver: over,
+        previousState: { tiles: state.tiles, score: state.score },
+        canUndo: true,
+      };
+    }
+
+    case 'UNDO': {
+      if (!state.previousState) return state;
+      return {
+        tiles: state.previousState.tiles,
+        score: state.previousState.score,
+        gameOver: false,
+        previousState: null,
+        canUndo: false,
+      };
     }
 
     case 'RESTART': {
-      return { tiles: makeInitialTiles(), score: 0, gameOver: false };
+      return { tiles: makeInitialTiles(), score: 0, gameOver: false, previousState: null, canUndo: false };
     }
 
     default:
@@ -231,7 +251,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 }
 
 function createInitialState(): GameState {
-  return { tiles: makeInitialTiles(), score: 0, gameOver: false };
+  return { tiles: makeInitialTiles(), score: 0, gameOver: false, previousState: null, canUndo: false };
 }
 
 export function useFibonacciGame() {
@@ -254,11 +274,17 @@ export function useFibonacciGame() {
     dispatch({ type: 'RESTART' });
   }, []);
 
+  const undo = useCallback(() => {
+    dispatch({ type: 'UNDO' });
+  }, []);
+
   return {
     tiles: state.tiles,
     score: state.score,
     gameOver: state.gameOver,
+    canUndo: state.canUndo,
     swipe,
     restart,
+    undo,
   };
 }

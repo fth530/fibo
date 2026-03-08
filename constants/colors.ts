@@ -1,4 +1,22 @@
-export const GameColors = {
+import type { ThemeMode } from '@/hooks/useSettings';
+
+export interface ThemeColors {
+  background: string;
+  boardBg: string;
+  emptyCell: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  scoreCard: string;
+  scoreCardShadow: string;
+  restartBtn: string;
+  restartBtnText: string;
+  modalBg: string;
+  modalBackdrop: string;
+  divider: string;
+}
+
+const LightTheme: ThemeColors = {
   background: '#FAF7F2',
   boardBg: '#EDE7DC',
   emptyCell: '#D8D0C4',
@@ -9,7 +27,33 @@ export const GameColors = {
   scoreCardShadow: 'rgba(44,36,32,0.08)',
   restartBtn: '#2C2420',
   restartBtnText: '#FAF7F2',
+  modalBg: '#FFFFFF',
+  modalBackdrop: 'rgba(44,36,32,0.45)',
+  divider: '#EDE7DC',
 };
+
+const DarkTheme: ThemeColors = {
+  background: '#1A1A1A',
+  boardBg: '#2A2A2A',
+  emptyCell: '#3A3A3A',
+  textPrimary: '#F0ECE6',
+  textSecondary: '#9C9488',
+  textMuted: '#6B6560',
+  scoreCard: '#2A2A2A',
+  scoreCardShadow: 'rgba(0,0,0,0.3)',
+  restartBtn: '#F0ECE6',
+  restartBtnText: '#1A1A1A',
+  modalBg: '#2A2A2A',
+  modalBackdrop: 'rgba(0,0,0,0.65)',
+  divider: '#3A3A3A',
+};
+
+export function getTheme(mode: ThemeMode): ThemeColors {
+  return mode === 'dark' ? DarkTheme : LightTheme;
+}
+
+// Keep GameColors as default light theme for backward compatibility
+export const GameColors = LightTheme;
 
 export const TileColors: Record<number, { bg: string; text: string; shadow: string }> = {
   1:   { bg: '#F2ECE2', text: '#B0A090', shadow: 'rgba(176,160,144,0.3)' },

@@ -403,6 +403,8 @@ describe('gameReducer', () => {
         tiles: [tile(2, 0, 0), tile(3, 0, 3)],
         score: 0,
         gameOver: false,
+        previousState: null,
+        canUndo: false,
     };
 
     it('SWIPE merges tiles and updates score', () => {
@@ -419,6 +421,8 @@ describe('gameReducer', () => {
             tiles: [tile(1, 0, 0)],
             score: 10,
             gameOver: false,
+            previousState: null,
+            canUndo: false,
         };
         const newState = gameReducer(stuck, { type: 'SWIPE', dir: 'left' });
 
@@ -430,6 +434,8 @@ describe('gameReducer', () => {
             tiles: [tile(1, 0, 0)],
             score: 50,
             gameOver: true,
+            previousState: null,
+            canUndo: false,
         };
         const newState = gameReducer(overState, { type: 'SWIPE', dir: 'right' });
 
@@ -441,6 +447,8 @@ describe('gameReducer', () => {
             tiles: [tile(89, 0, 0), tile(144, 0, 1)],
             score: 500,
             gameOver: true,
+            previousState: null,
+            canUndo: false,
         };
         const newState = gameReducer(midGameState, { type: 'RESTART' });
 

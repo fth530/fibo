@@ -62,7 +62,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
       {__DEV__ ? (
         <Pressable
           onPress={() => setIsModalVisible(true)}
-          accessibilityLabel="View error details"
+          accessibilityLabel="Hata detaylarını gör"
           accessibilityRole="button"
           style={({ pressed }) => [
             styles.topButton,
@@ -79,11 +79,11 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
 
       <View style={styles.content}>
         <Text style={[styles.title, { color: theme.text }]}>
-          Something went wrong
+          Bir hata oluştu
         </Text>
 
         <Text style={[styles.message, { color: theme.textSecondary }]}>
-          Please reload the app to continue.
+          Devam etmek için uygulamayı yeniden başlatın.
         </Text>
 
         <Pressable
@@ -98,7 +98,7 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
           ]}
         >
           <Text style={[styles.buttonText, { color: theme.buttonText }]}>
-            Try Again
+            Tekrar Dene
           </Text>
         </Pressable>
       </View>
@@ -128,11 +128,11 @@ export function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
                 ]}
               >
                 <Text style={[styles.modalTitle, { color: theme.text }]}>
-                  Error Details
+                  Hata Detayları
                 </Text>
                 <Pressable
                   onPress={() => setIsModalVisible(false)}
-                  accessibilityLabel="Close error details"
+                  accessibilityLabel="Hata detaylarını kapat"
                   accessibilityRole="button"
                   style={({ pressed }) => [
                     styles.closeButton,
