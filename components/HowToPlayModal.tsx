@@ -13,26 +13,28 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { GameColors, getTileStyle } from '@/constants/colors';
+import { getTileStyle } from '@/constants/colors';
+import type { ThemeColors } from '@/constants/colors';
 
 interface HowToPlayModalProps {
   visible: boolean;
   onClose: () => void;
+  theme: ThemeColors;
 }
 
-function ExampleTile({ value, highlight }: { value: string; highlight?: boolean }) {
+function ExampleTile({ value, highlight, theme }: { value: string; highlight?: boolean; theme: ThemeColors }) {
   const tileStyle = getTileStyle(parseInt(value, 10));
   return (
     <View
       style={[
         styles.exTile,
-        { backgroundColor: highlight ? tileStyle.bg : GameColors.emptyCell },
+        { backgroundColor: highlight ? tileStyle.bg : theme.emptyCell },
       ]}
     >
       <Text
         style={[
           styles.exTileText,
-          { color: highlight ? tileStyle.text : GameColors.textSecondary },
+          { color: highlight ? tileStyle.text : theme.textSecondary },
         ]}
       >
         {value}
@@ -41,27 +43,19 @@ function ExampleTile({ value, highlight }: { value: string; highlight?: boolean 
   );
 }
 
-function MergeExample({
-  a,
-  b,
-  result,
-}: {
-  a: string;
-  b: string;
-  result: string;
-}) {
+function MergeExample({ a, b, result, theme }: { a: string; b: string; result: string; theme: ThemeColors }) {
   return (
     <View style={styles.mergeRow}>
-      <ExampleTile value={a} />
-      <Text style={styles.mathOp}>+</Text>
-      <ExampleTile value={b} />
-      <Text style={styles.mathOp}>=</Text>
-      <ExampleTile value={result} highlight />
+      <ExampleTile value={a} theme={theme} />
+      <Text style={[styles.mathOp, { color: theme.textMuted }]}>+</Text>
+      <ExampleTile value={b} theme={theme} />
+      <Text style={[styles.mathOp, { color: theme.textMuted }]}>=</Text>
+      <ExampleTile value={result} highlight theme={theme} />
     </View>
   );
 }
 
-export function HowToPlayModal({ visible, onClose }: HowToPlayModalProps) {
+export function HowToPlayModal({ visible, onClose, theme }: HowToPlayModalProps) {
   const backdropAlpha = useSharedValue(0);
   const cardY = useSharedValue(600);
 
@@ -92,49 +86,49 @@ export function HowToPlayModal({ visible, onClose }: HowToPlayModalProps) {
       statusBarTranslucent
     >
       <View style={styles.outerWrapper}>
-        <Animated.View style={[styles.backdrop, backdropStyle]}>
+        <Animated.View style={[styles.backdrop, { backgroundColor: theme.modalBackdrop }, backdropStyle]}>
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         </Animated.View>
 
-        <Animated.View style={[styles.card, cardStyle]}>
+        <Animated.View style={[styles.card, { backgroundColor: theme.modalBg }, cardStyle]}>
           <View style={styles.handle} />
 
-          <Text style={styles.modalTitle}>how to play</Text>
+          <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>nasıl oynanır</Text>
 
           <View style={styles.rulesList}>
             <View style={styles.ruleRow}>
               <View style={styles.dot} />
-              <Text style={styles.ruleText}>
-                Swipe to slide all tiles in that direction.
+              <Text style={[styles.ruleText, { color: theme.textSecondary }]}>
+                Kaydırarak tüm taşları o yöne hareket ettir.
               </Text>
             </View>
 
             <View style={styles.ruleRow}>
               <View style={styles.dot} />
-              <Text style={styles.ruleText}>
-                Two tiles merge only when they are{' '}
-                <Text style={styles.emphasis}>consecutive Fibonacci numbers.</Text>
+              <Text style={[styles.ruleText, { color: theme.textSecondary }]}>
+                İki taş yalnızca{' '}
+                <Text style={[styles.emphasis, { color: theme.textPrimary }]}>ardışık Fibonacci sayıları</Text> olduğunda birleşir.
               </Text>
             </View>
           </View>
 
-          <View style={styles.examplesBlock}>
-            <MergeExample a="2" b="3" result="5" />
-            <MergeExample a="5" b="8" result="13" />
-            <MergeExample a="8" b="13" result="21" />
+          <View style={[styles.examplesBlock, { backgroundColor: theme.background }]}>
+            <MergeExample a="2" b="3" result="5" theme={theme} />
+            <MergeExample a="5" b="8" result="13" theme={theme} />
+            <MergeExample a="8" b="13" result="21" theme={theme} />
           </View>
 
           <View style={styles.exceptionRow}>
-            <Text style={styles.exceptionLabel}>Only exception</Text>
+            <Text style={[styles.exceptionLabel, { color: theme.textMuted }]}>Tek istisna</Text>
             <View style={styles.exceptionMerge}>
-              <MergeExample a="1" b="1" result="2" />
+              <MergeExample a="1" b="1" result="2" theme={theme} />
             </View>
           </View>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
-          <Text style={styles.goalText}>
-            Build the highest number possible. Good luck!
+          <Text style={[styles.goalText, { color: theme.textMuted }]}>
+            Mümkün olan en yüksek sayıya ulaş. İyi şanslar!
           </Text>
 
           <Pressable
@@ -142,12 +136,13 @@ export function HowToPlayModal({ visible, onClose }: HowToPlayModalProps) {
             style={({ pressed }) => [
               styles.closeBtn,
               {
+                backgroundColor: theme.restartBtn,
                 opacity: pressed ? 0.82 : 1,
                 transform: [{ scale: pressed ? 0.97 : 1 }],
               },
             ]}
           >
-            <Text style={styles.closeBtnText}>Got it</Text>
+            <Text style={[styles.closeBtnText, { color: theme.restartBtnText }]}>Anladım</Text>
           </Pressable>
         </Animated.View>
       </View>
@@ -162,10 +157,8 @@ const styles = StyleSheet.create({
   },
   backdrop: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(44,36,32,0.45)',
   },
   card: {
-    backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingTop: 12,
@@ -187,7 +180,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 4,
     borderRadius: 2,
-    backgroundColor: GameColors.emptyCell,
+    backgroundColor: '#D8D0C4',
     alignSelf: 'center',
     marginBottom: 4,
   },
@@ -195,7 +188,6 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
     fontSize: 22,
     letterSpacing: -0.7,
-    color: GameColors.textPrimary,
   },
   rulesList: {
     gap: 10,
@@ -216,19 +208,16 @@ const styles = StyleSheet.create({
   ruleText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: GameColors.textSecondary,
     lineHeight: 20,
     flex: 1,
   },
   emphasis: {
     fontFamily: 'Inter_600SemiBold',
-    color: GameColors.textPrimary,
   },
   examplesBlock: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: GameColors.background,
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 12,
@@ -252,7 +241,6 @@ const styles = StyleSheet.create({
   mathOp: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 12,
-    color: GameColors.textMuted,
   },
   exceptionRow: {
     flexDirection: 'row',
@@ -262,7 +250,6 @@ const styles = StyleSheet.create({
   exceptionLabel: {
     fontFamily: 'Inter_500Medium',
     fontSize: 12,
-    color: GameColors.textMuted,
     letterSpacing: 0.2,
     flexShrink: 0,
   },
@@ -271,19 +258,16 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: GameColors.emptyCell,
     marginVertical: -4,
   },
   goalText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: GameColors.textMuted,
     textAlign: 'center',
     lineHeight: 18,
     marginTop: -4,
   },
   closeBtn: {
-    backgroundColor: GameColors.restartBtn,
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
@@ -291,7 +275,6 @@ const styles = StyleSheet.create({
   closeBtnText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 16,
-    color: '#FAF7F2',
     letterSpacing: 0.2,
   },
 });

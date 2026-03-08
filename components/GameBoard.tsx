@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, View, useWindowDimensions, Platform } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { GameTile } from '@/components/GameTile';
-import { GameColors } from '@/constants/colors';
+import type { ThemeColors } from '@/constants/colors';
 import type { TileData, Direction } from '@/hooks/useFibonacciGame';
 
 const GRID_SIZE = 4;
@@ -14,9 +14,10 @@ const MIN_SWIPE = 20;
 interface GameBoardProps {
   tiles: TileData[];
   onSwipe: (dir: Direction) => void;
+  theme: ThemeColors;
 }
 
-export function GameBoard({ tiles, onSwipe }: GameBoardProps) {
+export function GameBoard({ tiles, onSwipe, theme }: GameBoardProps) {
   const { width } = useWindowDimensions();
   const boardSize = Math.min(width - BOARD_MARGIN * 2, 420);
   const cellSize = (boardSize - BOARD_PADDING * 2 - GAP * (GRID_SIZE - 1)) / GRID_SIZE;
@@ -49,7 +50,18 @@ export function GameBoard({ tiles, onSwipe }: GameBoardProps) {
             borderRadius: boardSize * 0.06,
             padding: BOARD_PADDING,
             gap: GAP,
+            backgroundColor: theme.boardBg,
           },
+          Platform.select({
+            ios: {
+              shadowColor: 'rgba(44,36,32,0.12)',
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 1,
+              shadowRadius: 20,
+            },
+            android: { elevation: 6 },
+            web: { boxShadow: '0px 8px 20px rgba(44,36,32,0.12)' },
+          }),
         ]}
       >
         <View style={[styles.cellGrid, { gap: GAP }]}>
@@ -62,6 +74,7 @@ export function GameBoard({ tiles, onSwipe }: GameBoardProps) {
                   width: cellSize,
                   height: cellSize,
                   borderRadius: cellSize * 0.12,
+                  backgroundColor: theme.emptyCell,
                 },
               ]}
             />
@@ -85,26 +98,10 @@ export function GameBoard({ tiles, onSwipe }: GameBoardProps) {
 }
 
 const styles = StyleSheet.create({
-  board: {
-    backgroundColor: GameColors.boardBg,
-    ...Platform.select({
-      ios: {
-        shadowColor: 'rgba(44,36,32,0.12)',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 1,
-        shadowRadius: 20,
-      },
-      android: { elevation: 6 },
-      web: {
-        boxShadow: '0px 8px 20px rgba(44,36,32,0.12)',
-      },
-    }),
-  },
+  board: {},
   cellGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
   },
-  emptyCell: {
-    backgroundColor: GameColors.emptyCell,
-  },
+  emptyCell: {},
 });

@@ -10,13 +10,14 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { SettingsContext, useSettingsProvider } from "@/hooks/useSettings";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 function RootLayoutNav() {
   return (
-    <Stack screenOptions={{ headerBackTitle: "Back" }}>
+    <Stack screenOptions={{ headerBackTitle: "Geri" }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
   );
@@ -30,19 +31,24 @@ export default function RootLayout() {
     Inter_700Bold,
   });
 
+  const settingsValue = useSettingsProvider();
+
   useEffect(() => {
-    if (fontsLoaded || fontError) {
+    if ((fontsLoaded || fontError) && settingsValue.isLoaded) {
       SplashScreen.hideAsync();
     }
-  }, [fontsLoaded, fontError]);
+  }, [fontsLoaded, fontError, settingsValue.isLoaded]);
 
   if (!fontsLoaded && !fontError) return null;
+  if (!settingsValue.isLoaded) return null;
 
   return (
     <ErrorBoundary>
-      <GestureHandlerRootView>
-        <RootLayoutNav />
-      </GestureHandlerRootView>
+      <SettingsContext.Provider value={settingsValue}>
+        <GestureHandlerRootView>
+          <RootLayoutNav />
+        </GestureHandlerRootView>
+      </SettingsContext.Provider>
     </ErrorBoundary>
   );
 }
