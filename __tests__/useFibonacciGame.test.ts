@@ -408,41 +408,26 @@ describe('gameReducer', () => {
         moveCount: 0,
     };
 
-    it('SWIPE merges tiles and updates score', () => {
-        const newState = gameReducer(initialState, { type: 'SWIPE', dir: 'left' });
+    it('APPLY_SWIPE merges tiles and updates score', () => {
+        // Pre-compute slide result (what the hook does before dispatching)
+        const { newTiles, scoreGained } = slideBoard(initialState.tiles, 'left');
+        const newState = gameReducer(initialState, { type: 'APPLY_SWIPE', newTiles, scoreGained });
 
         // 2+3=5 merge happened
         expect(newState.score).toBe(5);
         // Spawned one new tile, so total should be 2 (merged + spawned)
         expect(newState.tiles.length).toBe(2);
+        expect(newState.canUndo).toBe(true);
+        expect(newState.moveCount).toBe(1);
     });
 
-    it('SWIPE returns same state when no movement', () => {
-        const stuck: GameState = {
-            tiles: [tile(1, 0, 0)],
-            score: 10,
-            gameOver: false,
-            previousState: null,
-            canUndo: false,
-            moveCount: 0,
-        };
-        const newState = gameReducer(stuck, { type: 'SWIPE', dir: 'left' });
+    it('APPLY_SWIPE preserves previous state for undo', () => {
+        const { newTiles, scoreGained } = slideBoard(initialState.tiles, 'left');
+        const newState = gameReducer(initialState, { type: 'APPLY_SWIPE', newTiles, scoreGained });
 
-        expect(newState).toBe(stuck); // Same reference, no change
-    });
-
-    it('SWIPE is a no-op when game is over', () => {
-        const overState: GameState = {
-            tiles: [tile(1, 0, 0)],
-            score: 50,
-            gameOver: true,
-            previousState: null,
-            canUndo: false,
-            moveCount: 0,
-        };
-        const newState = gameReducer(overState, { type: 'SWIPE', dir: 'right' });
-
-        expect(newState).toBe(overState);
+        expect(newState.previousState).not.toBeNull();
+        expect(newState.previousState!.score).toBe(0);
+        expect(newState.previousState!.tiles).toBe(initialState.tiles);
     });
 
     it('RESTART resets state completely', () => {
@@ -459,6 +444,18 @@ describe('gameReducer', () => {
         expect(newState.score).toBe(0);
         expect(newState.gameOver).toBe(false);
         expect(newState.tiles.length).toBe(2);
+        expect(newState.moveCount).toBe(0);
         newState.tiles.forEach((t) => expect(t.value).toBe(1));
+    });
+
+    it('UNDO restores previous state', () => {
+        const { newTiles, scoreGained } = slideBoard(initialState.tiles, 'left');
+        const afterSwipe = gameReducer(initialState, { type: 'APPLY_SWIPE', newTiles, scoreGained });
+        const afterUndo = gameReducer(afterSwipe, { type: 'UNDO' });
+
+        expect(afterUndo.score).toBe(0);
+        expect(afterUndo.tiles).toBe(initialState.tiles);
+        expect(afterUndo.canUndo).toBe(false);
+        expect(afterUndo.previousState).toBeNull();
     });
 });

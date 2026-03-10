@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const BEST_SCORE_KEY = '@fibonacci_best_score';
 
-export function useBestScore(currentScore: number): number {
+export function useBestScore(currentScore: number) {
   const [bestScore, setBestScore] = useState(0);
 
   useEffect(() => {
@@ -14,15 +14,20 @@ export function useBestScore(currentScore: number): number {
           if (!isNaN(saved) && saved > 0) setBestScore(saved);
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   useEffect(() => {
     if (currentScore > bestScore) {
       setBestScore(currentScore);
-      AsyncStorage.setItem(BEST_SCORE_KEY, String(currentScore)).catch(() => {});
+      AsyncStorage.setItem(BEST_SCORE_KEY, String(currentScore)).catch(() => { });
     }
   }, [currentScore, bestScore]);
 
-  return bestScore;
+  const resetBestScore = useCallback(() => {
+    setBestScore(0);
+    AsyncStorage.removeItem(BEST_SCORE_KEY).catch(() => { });
+  }, []);
+
+  return { bestScore, resetBestScore };
 }

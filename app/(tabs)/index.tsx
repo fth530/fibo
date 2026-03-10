@@ -41,7 +41,7 @@ interface FloatingScoreItem {
 export default function GameScreen() {
   const insets = useSafeAreaInsets();
   const { tiles, score, gameOver, canUndo, moveCount, swipe, restart, undo } = useFibonacciGame();
-  const bestScore = useBestScore(score);
+  const { bestScore, resetBestScore } = useBestScore(score);
   const { settings, updateSettings } = useSettings();
   const { stats, recordGame, resetStats } = useGameStats();
 
@@ -77,6 +77,12 @@ export default function GameScreen() {
     setFloatingScores((prev) => prev.filter((f) => f.id !== id));
   }, []);
 
+  // Reset all persisted data
+  const handleResetAll = useCallback(() => {
+    resetStats();
+    resetBestScore();
+  }, [resetStats, resetBestScore]);
+
   // First launch tutorial
   useEffect(() => {
     if (!settings.hasSeenTutorial) {
@@ -103,6 +109,7 @@ export default function GameScreen() {
 
   const boardShakeStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: boardShake.value }],
+    opacity: boardOpacity.value,
   }));
 
   useEffect(() => {
@@ -124,7 +131,7 @@ export default function GameScreen() {
     if (settings.hapticEnabled) fn();
   };
 
-  const handleSwipe = (dir: Direction) => {
+  const handleSwipe = useCallback((dir: Direction) => {
     const result = swipe(dir);
     if (!result.changed) {
       haptic(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error));
@@ -145,7 +152,7 @@ export default function GameScreen() {
     } else {
       haptic(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light));
     }
-  };
+  }, [swipe, settings.hapticEnabled, boardShake]);
 
   const doRestart = () => {
     haptic(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success));
@@ -224,7 +231,7 @@ export default function GameScreen() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  });
+  }, [handleSwipe]);
 
   return (
     <View
@@ -345,7 +352,7 @@ export default function GameScreen() {
         onClose={() => setShowSettings(false)}
         theme={theme}
         stats={stats}
-        onResetStats={resetStats}
+        onResetStats={handleResetAll}
       />
     </View>
   );

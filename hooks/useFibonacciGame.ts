@@ -206,21 +206,16 @@ export interface GameState {
 }
 
 type GameAction =
-  | { type: 'SWIPE'; dir: Direction }
+  | { type: 'APPLY_SWIPE'; newTiles: TileData[]; scoreGained: number }
   | { type: 'RESTART' }
   | { type: 'UNDO' };
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
-    case 'SWIPE': {
-      if (state.gameOver) return state;
-
-      const { newTiles, scoreGained, changed } = slideBoard(state.tiles, action.dir);
-      if (!changed) return state;
-
-      const cleared = newTiles.map((t) => ({ ...t, isNew: false }));
+    case 'APPLY_SWIPE': {
+      const cleared = action.newTiles.map((t) => ({ ...t, isNew: false }));
       const afterSpawn = spawnOne(cleared);
-      const newScore = state.score + scoreGained;
+      const newScore = state.score + action.scoreGained;
       const over = isGameOver(afterSpawn);
 
       return {
@@ -265,10 +260,10 @@ export function useFibonacciGame() {
     (dir: Direction): SwipeResult => {
       if (state.gameOver) return { changed: false, merged: false, scoreGained: 0 };
 
-      const { changed, hadMerge, scoreGained } = slideBoard(state.tiles, dir);
+      const { newTiles, changed, hadMerge, scoreGained } = slideBoard(state.tiles, dir);
       if (!changed) return { changed: false, merged: false, scoreGained: 0 };
 
-      dispatch({ type: 'SWIPE', dir });
+      dispatch({ type: 'APPLY_SWIPE', newTiles, scoreGained });
       return { changed: true, merged: hadMerge, scoreGained };
     },
     [state.tiles, state.gameOver]

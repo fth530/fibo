@@ -26,7 +26,8 @@ export function AnimatedScore({ value, style }: AnimatedScoreProps) {
         return () => {
             animatedValue.removeListener(listenerId);
         };
-    }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- animatedValue is a ref (stable), displayValue is intentionally stale to animate FROM the previous value
+    }, [value]);
 
     return (
         <Text style={style}>{displayValue}</Text>
