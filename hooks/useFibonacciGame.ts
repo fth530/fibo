@@ -51,6 +51,7 @@ export type Direction = 'left' | 'right' | 'up' | 'down';
 export interface SwipeResult {
   changed: boolean;
   merged: boolean;
+  scoreGained: number;
 }
 
 export function makeGrid(tiles: TileData[]): (TileData | null)[][] {
@@ -201,6 +202,7 @@ export interface GameState {
   gameOver: boolean;
   previousState: { tiles: TileData[]; score: number } | null;
   canUndo: boolean;
+  moveCount: number;
 }
 
 type GameAction =
@@ -227,6 +229,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         gameOver: over,
         previousState: { tiles: state.tiles, score: state.score },
         canUndo: true,
+        moveCount: state.moveCount + 1,
       };
     }
 
@@ -238,11 +241,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         gameOver: false,
         previousState: null,
         canUndo: false,
+        moveCount: state.moveCount - 1,
       };
     }
 
     case 'RESTART': {
-      return { tiles: makeInitialTiles(), score: 0, gameOver: false, previousState: null, canUndo: false };
+      return { tiles: makeInitialTiles(), score: 0, gameOver: false, previousState: null, canUndo: false, moveCount: 0 };
     }
 
     default:
@@ -251,7 +255,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 }
 
 function createInitialState(): GameState {
-  return { tiles: makeInitialTiles(), score: 0, gameOver: false, previousState: null, canUndo: false };
+  return { tiles: makeInitialTiles(), score: 0, gameOver: false, previousState: null, canUndo: false, moveCount: 0 };
 }
 
 export function useFibonacciGame() {
@@ -259,13 +263,13 @@ export function useFibonacciGame() {
 
   const swipe = useCallback(
     (dir: Direction): SwipeResult => {
-      if (state.gameOver) return { changed: false, merged: false };
+      if (state.gameOver) return { changed: false, merged: false, scoreGained: 0 };
 
-      const { changed, hadMerge } = slideBoard(state.tiles, dir);
-      if (!changed) return { changed: false, merged: false };
+      const { changed, hadMerge, scoreGained } = slideBoard(state.tiles, dir);
+      if (!changed) return { changed: false, merged: false, scoreGained: 0 };
 
       dispatch({ type: 'SWIPE', dir });
-      return { changed: true, merged: hadMerge };
+      return { changed: true, merged: hadMerge, scoreGained };
     },
     [state.tiles, state.gameOver]
   );
@@ -283,6 +287,7 @@ export function useFibonacciGame() {
     score: state.score,
     gameOver: state.gameOver,
     canUndo: state.canUndo,
+    moveCount: state.moveCount,
     swipe,
     restart,
     undo,

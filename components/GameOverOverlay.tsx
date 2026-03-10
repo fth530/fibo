@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, View, Text, Pressable, Platform } from 'react-native';
+import { StyleSheet, View, Text, Pressable, Platform, Share } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -9,18 +9,31 @@ import Animated, {
   withSequence,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { ConfettiExplosion } from '@/components/ConfettiExplosion';
 import type { ThemeColors } from '@/constants/colors';
 
 interface GameOverOverlayProps {
   score: number;
   bestScore: number;
+  highestTile: number;
+  moveCount: number;
+  gameDuration: number;
   onPlayAgain: () => void;
   theme: ThemeColors;
+}
+
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m > 0 ? `${m}dk ${s}sn` : `${s}sn`;
 }
 
 export function GameOverOverlay({
   score,
   bestScore,
+  highestTile,
+  moveCount,
+  gameDuration,
   onPlayAgain,
   theme,
 }: GameOverOverlayProps) {
@@ -65,6 +78,15 @@ export function GameOverOverlay({
     transform: [{ scale: btnScale.value }],
   }));
 
+  const handleShare = async () => {
+    const msg = isNewBest
+      ? `🏆 Fibo'da yeni rekor! ${score} puan yaptım! En yüksek taşım: ${highestTile}. Sen de dene!`
+      : `🎮 Fibo'da ${score} puan yaptım! En yüksek taşım: ${highestTile}. Sen de dene!`;
+    try {
+      await Share.share({ message: msg });
+    } catch { }
+  };
+
   return (
     <Animated.View style={[styles.backdrop, { backgroundColor: theme.modalBackdrop }, backdropStyle]}>
       <Animated.View
@@ -102,9 +124,27 @@ export function GameOverOverlay({
           <Text style={[styles.prevBest, { color: theme.textMuted }]}>En İyi  {bestScore}</Text>
         )}
 
+        {/* Extra stats row */}
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Ionicons name="diamond-outline" size={14} color={theme.textSecondary} />
+            <Text style={[styles.statText, { color: theme.textSecondary }]}>{highestTile}</Text>
+          </View>
+          <View style={[styles.statDot, { backgroundColor: theme.textMuted }]} />
+          <View style={styles.statItem}>
+            <Ionicons name="swap-horizontal-outline" size={14} color={theme.textSecondary} />
+            <Text style={[styles.statText, { color: theme.textSecondary }]}>{moveCount} hamle</Text>
+          </View>
+          <View style={[styles.statDot, { backgroundColor: theme.textMuted }]} />
+          <View style={styles.statItem}>
+            <Ionicons name="time-outline" size={14} color={theme.textSecondary} />
+            <Text style={[styles.statText, { color: theme.textSecondary }]}>{formatDuration(gameDuration)}</Text>
+          </View>
+        </View>
+
         <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
-        <Animated.View style={[{ width: '100%' }, btnStyle]}>
+        <Animated.View style={[{ width: '100%', gap: 10 }, btnStyle]}>
           <Pressable
             onPress={onPlayAgain}
             style={({ pressed }) => [
@@ -118,8 +158,28 @@ export function GameOverOverlay({
           >
             <Text style={[styles.playAgainText, { color: theme.restartBtnText }]}>Tekrar Oyna</Text>
           </Pressable>
+
+          <Pressable
+            onPress={handleShare}
+            style={({ pressed }) => [
+              styles.shareBtn,
+              {
+                borderColor: theme.textMuted,
+                transform: [{ scale: pressed ? 0.96 : 1 }],
+                opacity: pressed ? 0.7 : 1,
+              },
+            ]}
+            accessibilityLabel="Skoru paylaş"
+            accessibilityRole="button"
+          >
+            <Ionicons name="share-outline" size={17} color={theme.textSecondary} />
+            <Text style={[styles.shareBtnText, { color: theme.textSecondary }]}>Paylaş</Text>
+          </Pressable>
         </Animated.View>
       </Animated.View>
+
+      {/* Confetti for new record */}
+      {isNewBest && <ConfettiExplosion />}
     </Animated.View>
   );
 }
@@ -185,6 +245,27 @@ const styles = StyleSheet.create({
     fontSize: 13,
     letterSpacing: 0.2,
   },
+  statsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 4,
+  },
+  statItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 12,
+    letterSpacing: 0.1,
+  },
+  statDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+  },
   divider: {
     width: '100%',
     height: 1,
@@ -199,6 +280,21 @@ const styles = StyleSheet.create({
   playAgainText: {
     fontFamily: 'Inter_700Bold',
     fontSize: 17,
+    letterSpacing: 0.2,
+  },
+  shareBtn: {
+    width: '100%',
+    borderRadius: 18,
+    paddingVertical: 14,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    borderWidth: 1,
+  },
+  shareBtnText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 15,
     letterSpacing: 0.2,
   },
 });

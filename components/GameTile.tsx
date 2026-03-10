@@ -6,6 +6,8 @@ import Animated, {
   withSpring,
   withSequence,
   withTiming,
+  withRepeat,
+  Easing,
 } from 'react-native-reanimated';
 import { getTileStyle } from '@/constants/colors';
 import type { TileData } from '@/hooks/useFibonacciGame';
@@ -16,6 +18,8 @@ interface GameTileProps {
   gap: number;
   padding: number;
 }
+
+const GLOW_THRESHOLD = 89;
 
 function getFontSize(value: number, cellSize: number): number {
   const digits = String(value).length;
@@ -32,6 +36,7 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
   const translateX = useSharedValue(targetX);
   const translateY = useSharedValue(targetY);
   const scale = useSharedValue(tile.isNew ? 0 : 1);
+  const glowPulse = useSharedValue(0);
 
   useEffect(() => {
     translateX.value = withSpring(targetX, { damping: 20, stiffness: 400, mass: 0.8 });
@@ -54,8 +59,24 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
     }
   }, [tile.isMerged, scale]);
 
+  // Glow pulse for high-value tiles (89+)
+  useEffect(() => {
+    if (tile.value >= GLOW_THRESHOLD) {
+      glowPulse.value = withRepeat(
+        withSequence(
+          withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.sin) })
+        ),
+        -1
+      );
+    } else {
+      glowPulse.value = 0;
+    }
+  }, [tile.value, glowPulse]);
+
   const tileStyle = getTileStyle(tile.value);
   const fontSize = getFontSize(tile.value, cellSize);
+  const hasGlow = tile.value >= GLOW_THRESHOLD;
 
   const animStyle = useAnimatedStyle(() => ({
     transform: [
@@ -65,12 +86,27 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
     ],
   }));
 
+  const glowStyle = useAnimatedStyle(() => {
+    if (!hasGlow) return {};
+    const intensity = glowPulse.value;
+    return Platform.select({
+      ios: {
+        shadowOpacity: 0.6 + intensity * 0.4,
+        shadowRadius: 8 + intensity * 10,
+      },
+      android: {
+        elevation: 4 + intensity * 8,
+      },
+      web: {},
+    }) ?? {};
+  });
+
   const shadowStyle = Platform.select({
     ios: {
       shadowColor: tileStyle.shadow,
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 1,
-      shadowRadius: 8,
+      shadowOpacity: hasGlow ? 0.6 : 1,
+      shadowRadius: hasGlow ? 8 : 8,
     },
     android: {},
     web: { boxShadow: `0px 4px 10px ${tileStyle.shadow}` },
@@ -78,6 +114,8 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
 
   return (
     <Animated.View
+      accessible
+      accessibilityLabel={`${tile.value} değerinde taş`}
       style={[
         styles.tile,
         {
@@ -88,6 +126,7 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
         },
         shadowStyle,
         animStyle,
+        hasGlow ? glowStyle : undefined,
       ]}
     >
       <Text

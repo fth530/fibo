@@ -24,10 +24,10 @@ export function useGameStats() {
         if (val) {
           try {
             setStats({ ...DEFAULT_STATS, ...JSON.parse(val) });
-          } catch {}
+          } catch { }
         }
       })
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const recordGame = useCallback((score: number, highestTile: number) => {
@@ -37,10 +37,15 @@ export function useGameStats() {
         highestTile: Math.max(prev.highestTile, highestTile),
         totalScore: prev.totalScore + score,
       };
-      AsyncStorage.setItem(STATS_KEY, JSON.stringify(next)).catch(() => {});
+      AsyncStorage.setItem(STATS_KEY, JSON.stringify(next)).catch(() => { });
       return next;
     });
   }, []);
 
-  return { stats, recordGame };
+  const resetStats = useCallback(() => {
+    setStats(DEFAULT_STATS);
+    AsyncStorage.removeItem(STATS_KEY).catch(() => { });
+  }, []);
+
+  return { stats, recordGame, resetStats };
 }

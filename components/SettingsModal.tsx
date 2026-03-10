@@ -7,6 +7,7 @@ import {
   Pressable,
   Switch,
   Platform,
+  Alert,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -15,6 +16,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import Constants from 'expo-constants';
 import { useSettings } from '@/hooks/useSettings';
 import type { ThemeColors } from '@/constants/colors';
 import type { GameStats } from '@/hooks/useGameStats';
@@ -24,9 +26,12 @@ interface SettingsModalProps {
   onClose: () => void;
   theme: ThemeColors;
   stats: GameStats;
+  onResetStats?: () => void;
 }
 
-export function SettingsModal({ visible, onClose, theme, stats }: SettingsModalProps) {
+const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
+
+export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: SettingsModalProps) {
   const { settings, updateSettings } = useSettings();
 
   const backdropAlpha = useSharedValue(0);
@@ -49,6 +54,27 @@ export function SettingsModal({ visible, onClose, theme, stats }: SettingsModalP
   const cardStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: cardY.value }],
   }));
+
+  const handleResetData = () => {
+    if (Platform.OS === 'web') {
+      if (confirm('Tüm istatistikler ve en iyi skor sıfırlanacak. Emin misin?')) {
+        onResetStats?.();
+      }
+    } else {
+      Alert.alert(
+        'Verileri Sıfırla',
+        'Tüm istatistikler ve en iyi skor sıfırlanacak. Bu işlem geri alınamaz.',
+        [
+          { text: 'İptal', style: 'cancel' },
+          {
+            text: 'Sıfırla',
+            style: 'destructive',
+            onPress: () => onResetStats?.(),
+          },
+        ]
+      );
+    }
+  };
 
   return (
     <Modal
@@ -117,6 +143,22 @@ export function SettingsModal({ visible, onClose, theme, stats }: SettingsModalP
 
           <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
+          {/* Reset Data */}
+          {onResetStats && (
+            <Pressable
+              onPress={handleResetData}
+              style={({ pressed }) => [
+                styles.resetBtn,
+                { opacity: pressed ? 0.7 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] },
+              ]}
+              accessibilityLabel="Verileri sıfırla"
+              accessibilityRole="button"
+            >
+              <Ionicons name="trash-outline" size={16} color="#E85050" />
+              <Text style={styles.resetBtnText}>Verileri Sıfırla</Text>
+            </Pressable>
+          )}
+
           <Pressable
             onPress={onClose}
             style={({ pressed }) => [
@@ -126,6 +168,11 @@ export function SettingsModal({ visible, onClose, theme, stats }: SettingsModalP
           >
             <Text style={[styles.closeBtnText, { color: theme.restartBtnText }]}>Tamam</Text>
           </Pressable>
+
+          {/* App Version */}
+          <Text style={[styles.versionText, { color: theme.textMuted }]}>
+            Fibo v{APP_VERSION}
+          </Text>
         </Animated.View>
       </View>
     </Modal>
@@ -227,6 +274,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: 0.2,
   },
+  resetBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 12,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(232,80,80,0.25)',
+  },
+  resetBtnText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 14,
+    color: '#E85050',
+  },
   closeBtn: {
     borderRadius: 16,
     paddingVertical: 16,
@@ -236,5 +298,12 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     fontSize: 16,
     letterSpacing: 0.2,
+  },
+  versionText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 11,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+    marginTop: -8,
   },
 });
