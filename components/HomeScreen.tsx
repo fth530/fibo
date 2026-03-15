@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
     letterSpacing: 1.5,
-    marginBottom: 2,
+    marginBottom: 6,
   },
   emptyText: {
     fontFamily: 'Inter_400Regular',
@@ -312,6 +312,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     borderRadius: 16,
+    marginBottom: 10,
   },
   slotInfo: {
     gap: 4,

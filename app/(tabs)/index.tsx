@@ -67,7 +67,7 @@ export default function AppRoot() {
   const { slots, saveGame, deleteGame, findEmptySlot } = useSavedGames();
   const { challenge: dailyChallenge, completeDaily, getDailyTiles } = useDailyChallenge();
   const { recordSession, onReachTile55, onNewPersonalBest } = useReviewPrompt();
-  const { playMerge, playSwipe, playGameOver, playNewRecord } = useGameAudio();
+  const { playMerge, playSwipe, playGameOver } = useGameAudio();
   const [isDailyMode, setIsDailyMode] = useState(false);
 
   const [showTutorial, setShowTutorial] = useState(false);
@@ -195,13 +195,10 @@ export default function AppRoot() {
   useEffect(() => {
     if (gameOver && !prevGameOver.current) {
       const highestTile = tiles.reduce((max, ti) => Math.max(max, ti.value), 0);
-      const isNewBest = score > 0 && score >= bestScore;
       recordGame(score, highestTile);
       if (isDailyMode) completeDaily(score);
       else if (activeSlot >= 0) deleteGame(activeSlot);
-      // Play sound
-      if (isNewBest) playNewRecord();
-      else playGameOver();
+      playGameOver();
     }
     prevGameOver.current = gameOver;
   }, [gameOver, score, tiles, recordGame, activeSlot, deleteGame]);
@@ -236,6 +233,8 @@ export default function AppRoot() {
       );
     }
   }, [score, scoreScale, scoreShake]);
+
+
 
   const haptic = (fn: () => void) => {
     if (settings.hapticEnabled) fn();
