@@ -89,6 +89,7 @@ const strings = {
   startPlaying: { tr: 'Oynamaya Başla', en: 'Start Playing', ja: 'ゲーム開始', de: 'Spiel starten', ko: '게임 시작', fr: 'Commencer à Jouer', pt: 'Começar a Jogar', es: 'Empezar a Jugar' },
 
   // Sharing
+  share: { tr: 'Paylaş', en: 'Share', ja: '共有', de: 'Teilen', ko: '공유', fr: 'Partager', pt: 'Compartilhar', es: 'Compartir' },
   shareMsg: { tr: 'Fibo\'da {score} puan yaptım! En yüksek taşım: {tile}. Sen de dene!', en: 'I scored {score} in Fibo! My highest tile: {tile}. Try it!', ja: 'Fiboで{score}点を獲得！最高タイル: {tile}。やってみて！', de: 'Ich habe {score} Punkte in Fibo erreicht! Höchste Kachel: {tile}. Probier es aus!', ko: 'Fibo에서 {score}점 달성! 최고 타일: {tile}. 도전해 보세요!', fr: "J'ai obtenu {score} points dans Fibo ! Plus haute tuile : {tile}. Essayez !", pt: 'Fiz {score} pontos no Fibo! Maior peça: {tile}. Experimente!', es: '¡Hice {score} puntos en Fibo! Mayor ficha: {tile}. ¡Pruébalo!' },
   shareNewRecord: { tr: 'Fibo\'da yeni rekor! {score} puan! En yüksek taşım: {tile}. Sen de dene!', en: 'New record in Fibo! I scored {score}! Highest tile: {tile}. Try it!', ja: 'Fibo新記録！{score}点達成！最高タイル: {tile}。挑戦してみて！', de: 'Neuer Rekord in Fibo! {score} Punkte! Höchste Kachel: {tile}. Probier es!', ko: 'Fibo 새 기록! {score}점! 최고 타일: {tile}. 도전하세요!', fr: 'Nouveau record dans Fibo ! {score} points ! Plus haute tuile : {tile}. Essayez !', pt: 'Novo recorde no Fibo! {score} pontos! Maior peça: {tile}. Experimente!', es: '¡Nuevo récord en Fibo! ¡{score} puntos! Mayor ficha: {tile}. ¡Pruébalo!' },
 } as const;

@@ -14,6 +14,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { getTileStyle } from '@/constants/colors';
+import { useT } from '@/constants/i18n';
 import type { ThemeColors } from '@/constants/colors';
 
 interface HowToPlayModalProps {
@@ -56,6 +57,7 @@ function MergeExample({ a, b, result, theme }: { a: string; b: string; result: s
 }
 
 export function HowToPlayModal({ visible, onClose, theme }: HowToPlayModalProps) {
+  const t = useT();
   const backdropAlpha = useSharedValue(0);
   const cardY = useSharedValue(600);
 
@@ -93,21 +95,21 @@ export function HowToPlayModal({ visible, onClose, theme }: HowToPlayModalProps)
         <Animated.View style={[styles.card, { backgroundColor: theme.modalBg }, cardStyle]}>
           <View style={styles.handle} />
 
-          <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>nasıl oynanır</Text>
+          <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>{t.howToPlayTitle}</Text>
 
           <View style={styles.rulesList}>
             <View style={styles.ruleRow}>
               <View style={styles.dot} />
               <Text style={[styles.ruleText, { color: theme.textSecondary }]}>
-                Kaydırarak tüm taşları o yöne hareket ettir.
+                {t.rule1}
               </Text>
             </View>
 
             <View style={styles.ruleRow}>
               <View style={styles.dot} />
               <Text style={[styles.ruleText, { color: theme.textSecondary }]}>
-                İki taş yalnızca{' '}
-                <Text style={[styles.emphasis, { color: theme.textPrimary }]}>ardışık Fibonacci sayıları</Text> olduğunda birleşir.
+                {t.rule2prefix}
+                <Text style={[styles.emphasis, { color: theme.textPrimary }]}>{t.rule2bold}</Text>{t.rule2suffix}
               </Text>
             </View>
           </View>
@@ -119,7 +121,7 @@ export function HowToPlayModal({ visible, onClose, theme }: HowToPlayModalProps)
           </View>
 
           <View style={styles.exceptionRow}>
-            <Text style={[styles.exceptionLabel, { color: theme.textMuted }]}>Tek istisna</Text>
+            <Text style={[styles.exceptionLabel, { color: theme.textMuted }]}>{t.onlyException}</Text>
             <View style={styles.exceptionMerge}>
               <MergeExample a="1" b="1" result="2" theme={theme} />
             </View>
@@ -128,7 +130,7 @@ export function HowToPlayModal({ visible, onClose, theme }: HowToPlayModalProps)
           <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
           <Text style={[styles.goalText, { color: theme.textMuted }]}>
-            Mümkün olan en yüksek sayıya ulaş. İyi şanslar!
+            {t.goalText}
           </Text>
 
           <Pressable
@@ -142,7 +144,7 @@ export function HowToPlayModal({ visible, onClose, theme }: HowToPlayModalProps)
               },
             ]}
           >
-            <Text style={[styles.closeBtnText, { color: theme.restartBtnText }]}>Anladım</Text>
+            <Text style={[styles.closeBtnText, { color: theme.restartBtnText }]}>{t.gotIt}</Text>
           </Pressable>
         </Animated.View>
       </View>
