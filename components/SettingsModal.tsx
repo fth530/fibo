@@ -18,7 +18,10 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useSettings } from '@/hooks/useSettings';
-import { useT } from '@/constants/i18n';
+import { useT, LANGUAGE_LABELS } from '@/constants/i18n';
+import type { Language } from '@/hooks/useSettings';
+
+const LANG_ORDER: Language[] = ['en', 'tr', 'ja', 'de', 'ko', 'fr', 'pt', 'es'];
 import type { ThemeColors } from '@/constants/colors';
 import type { GameStats } from '@/hooks/useGameStats';
 
@@ -118,20 +121,34 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
             />
           </View>
 
-          {/* Language Toggle */}
-          <View style={styles.settingRow}>
+          {/* Language Selection */}
+          <View style={styles.settingRowColumn}>
             <View style={styles.settingInfo}>
               <Ionicons name="language-outline" size={20} color={theme.textSecondary} />
               <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>{t.language}</Text>
             </View>
-            <Pressable
-              onPress={() => updateSettings({ language: settings.language === 'tr' ? 'en' : 'tr' })}
-              style={[styles.langToggle, { backgroundColor: theme.background }]}
-            >
-              <Text style={[styles.langToggleText, { color: theme.textPrimary }]}>
-                {settings.language === 'tr' ? 'TR' : 'EN'}
-              </Text>
-            </Pressable>
+            <View style={styles.langGrid}>
+              {LANG_ORDER.map((lang) => (
+                <Pressable
+                  key={lang}
+                  onPress={() => updateSettings({ language: lang })}
+                  style={[
+                    styles.langChip,
+                    {
+                      backgroundColor: settings.language === lang ? theme.restartBtn : theme.background,
+                      borderColor: settings.language === lang ? theme.restartBtn : theme.divider,
+                    },
+                  ]}
+                >
+                  <Text style={[
+                    styles.langChipText,
+                    { color: settings.language === lang ? theme.restartBtnText : theme.textSecondary },
+                  ]}>
+                    {LANGUAGE_LABELS[lang]}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
 
           <View style={[styles.divider, { backgroundColor: theme.divider }]} />
@@ -250,15 +267,24 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     fontSize: 15,
   },
-  langToggle: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 10,
+  settingRowColumn: {
+    gap: 10,
+    paddingVertical: 4,
   },
-  langToggleText: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 13,
-    letterSpacing: 0.5,
+  langGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  langChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 10,
+    borderWidth: 1.5,
+  },
+  langChipText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 12,
   },
   divider: {
     height: 1,

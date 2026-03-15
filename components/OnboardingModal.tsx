@@ -8,8 +8,12 @@ import Animated, {
   withDelay,
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import { ScrollView } from 'react-native';
 import type { ThemeColors } from '@/constants/colors';
 import type { Language } from '@/hooks/useSettings';
+import { LANGUAGE_LABELS } from '@/constants/i18n';
+
+const LANGUAGES: Language[] = ['en', 'tr', 'ja', 'de', 'ko', 'fr', 'pt', 'es'];
 
 interface OnboardingModalProps {
   visible: boolean;
@@ -64,43 +68,28 @@ export function OnboardingModal({ visible, theme, selectedLanguage, onSelectLang
             {isTr ? 'Dil Seçin' : 'Select Language'}
           </Text>
 
-          <View style={styles.langRow}>
-            <Pressable
-              onPress={() => onSelectLanguage('tr')}
-              style={[
-                styles.langBtn,
-                {
-                  backgroundColor: selectedLanguage === 'tr' ? theme.restartBtn : theme.background,
-                  borderColor: selectedLanguage === 'tr' ? theme.restartBtn : theme.divider,
-                },
-              ]}
-            >
-              <Text style={[
-                styles.langBtnText,
-                { color: selectedLanguage === 'tr' ? theme.restartBtnText : theme.textPrimary },
-              ]}>
-                Türkçe
-              </Text>
-            </Pressable>
-
-            <Pressable
-              onPress={() => onSelectLanguage('en')}
-              style={[
-                styles.langBtn,
-                {
-                  backgroundColor: selectedLanguage === 'en' ? theme.restartBtn : theme.background,
-                  borderColor: selectedLanguage === 'en' ? theme.restartBtn : theme.divider,
-                },
-              ]}
-            >
-              <Text style={[
-                styles.langBtnText,
-                { color: selectedLanguage === 'en' ? theme.restartBtnText : theme.textPrimary },
-              ]}>
-                English
-              </Text>
-            </Pressable>
-          </View>
+          <ScrollView horizontal={false} style={styles.langScroll} contentContainerStyle={styles.langGrid}>
+            {LANGUAGES.map((lang) => (
+              <Pressable
+                key={lang}
+                onPress={() => onSelectLanguage(lang)}
+                style={[
+                  styles.langBtn,
+                  {
+                    backgroundColor: selectedLanguage === lang ? theme.restartBtn : theme.background,
+                    borderColor: selectedLanguage === lang ? theme.restartBtn : theme.divider,
+                  },
+                ]}
+              >
+                <Text style={[
+                  styles.langBtnText,
+                  { color: selectedLanguage === lang ? theme.restartBtnText : theme.textPrimary },
+                ]}>
+                  {LANGUAGE_LABELS[lang]}
+                </Text>
+              </Pressable>
+            ))}
+          </ScrollView>
 
           <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
@@ -186,15 +175,19 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginTop: 4,
   },
-  langRow: {
-    flexDirection: 'row',
-    gap: 10,
+  langScroll: {
+    maxHeight: 140,
     width: '100%',
   },
+  langGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
   langBtn: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 14,
+    width: '47%',
+    paddingVertical: 12,
+    borderRadius: 12,
     alignItems: 'center',
     borderWidth: 1.5,
   },

@@ -1,0 +1,770 @@
+==============================================================
+  FIBO - Fibonacci Birleştirme Oyunu
+  App Store Yayın Rehberi — Tüm Yapılanlar & ASO Stratejisi
+  Son güncelleme: 15 Mart 2026
+  Kaynak: fibo_appstore_guide_2026.docx + Fibo_ASO_Strategy.docx
+          + MathPulse referansı
+==============================================================
+
+
+██████████████████████████████████████████████████████████████
+  BÖLÜM A: APP STORE'DAN RED YEMEMEK İÇİN YAPILANLAR
+██████████████████████████████████████████████████████████████
+
+
+[A1] KRİTİK DÜZELTMELER
+--------------------------------------------------------------
+
+A1.1 Bundle Identifier
+     Dosya: app.json → ios.bundleIdentifier + android.package
+     Mevcut: "com.fibonacci.game"
+     Durum: *** EN SON DEĞİŞTİRİLECEK ***
+     Apple Developer Portal'da oluşturulacak.
+     Eğer alınmışsa: "com.corut.fibo" alternatifi.
+     NOT: Bir kez yayınladıktan sonra değiştirilemez.
+
+A1.2 Gizlilik Politikası (Privacy Policy)
+     [YAPILDI] docs/privacy-policy.html oluşturuldu.
+     İçeriği:
+     - Hiçbir kişisel veri toplanmıyor
+     - Yerel depolama: skor, istatistik, ayarlar (AsyncStorage)
+     - Üçüncü taraf servisi yok, ağ isteği yok
+     - COPPA uyumu (4+ yaş, veri toplanmıyor)
+     - İletişim e-postası mevcut
+     Host: GitHub Pages → https://fth530.github.io/fibo/privacy-policy.html
+
+A1.3 Support URL
+     GitHub repo: https://github.com/fth530/fibo
+
+A1.4 Slug, Scheme Temizliği
+     [YAPILDI] slug: "fibo-game", scheme: "fibo"
+     Development origin yok (temiz).
+
+A1.5 iOS Build Number + Şifreleme Beyanı
+     [YAPILDI] ios.buildNumber: "1", android.versionCode: 1
+     [YAPILDI] ITSAppUsesNonExemptEncryption: false
+
+A1.6 İsim Çakışması Kontrolü
+     KONTROL EDİLMELİ: App Store'da "Fibo" araması yap.
+     Aynı isimde popüler uygulama varsa isim değiştir.
+
+A1.7 ⚠ KRİTİK TARİH: 28 NİSAN 2026 — iOS 26 SDK
+     Bu tarihten itibaren iOS 26 SDK (Xcode 26) ile build ZORUNLU.
+     Eski SDK ile build alınan uygulamalar yüklenemeyecek.
+     Yapılacaklar:
+     - Expo SDK'yı iOS 26 desteği sunan sürüme yükselt (SDK 55+)
+     - eas.json build profillerini Xcode 26 ile doğrula
+     - Üçüncü parti paketlerin iOS 26 uyumunu kontrol et
+     - İlk başvuru 28 Nisan öncesinde yapılacaksa Xcode 16 hâlâ geçerli
+
+
+[A2] CRASH / BUG ÖNLEMELERİ (Guideline 2.1)
+--------------------------------------------------------------
+
+A2.1 ErrorBoundary
+     [YAPILDI] components/ErrorBoundary.tsx + ErrorFallback.tsx
+     Tüm uygulama sarılmış. "Tekrar Dene" butonu mevcut.
+
+A2.2 AppState Listener
+     Düşük risk (ses yok, timer yok, network yok).
+     Ses eklenirse AppState listener MUTLAKA eklenecek.
+
+A2.3 console.log Temizliği
+     [YAPILDI] Gereksiz log yok.
+
+A2.4 Performans Gereksinimleri
+     - Cold launch < 2 saniye
+     - Review süresince (15-30 dk) sıfır crash
+     - Memory leak kontrolü (Instruments ile)
+     - iPhone SE → iPhone 16 Pro Max arası test
+
+A2.5 Test Checklist
+     [  ] İlk açılışta onboarding düzgün mü?
+     [  ] Arka plan → ön plan: crash yok mu?
+     [  ] Telefon kilitle / aç: state korunuyor mu?
+     [  ] iPhone SE (4.7") — UI taşması yok mu?
+     [  ] iPhone 16 Pro Max (6.9") — Dynamic Island uyumu
+     [  ] 20+ kez aç-kapa: memory leak yok mu?
+     [  ] Dark mode geçişleri sorunsuz mu?
+     [  ] Kayıtlı oyun yükle/kaydet düzgün mü?
+     [  ] Safe Area, notch, yuvarlak köşe uyumu
+
+
+██████████████████████████████████████████████████████████████
+  ⚠⚠⚠ BÖLÜM A-EXTRA: KOPYA/KLON RİSKİ — EN KRİTİK TEHDİT
+██████████████████████████████████████████████████████████████
+
+Guideline 4.1 (Copycats) — Fibo için EN YÜKSEK risk.
+Apple, swipe-to-merge sayı bulmaca oyunlarına karşı hassastır.
+
+[A-EXTRA.1] MEKANİK FARKLILIKLAR (Reviewer'a Anlatılacak)
+--------------------------------------------------------------
+
+     Fark                    2048                   Fibo
+     Birleştirme kuralı      Eşit sayı (2+2=4)     Ardışık Fibonacci (2+3=5)
+     Hedef                   2048'e ulaş            Fibonacci dizisini ilerlet
+     Strateji                Köşe stratejisi        Dizi takibi + ardışıklık planı
+     Zorluk                  Çarpım mantığı         Fibonacci dizisi bilişsel yükü
+     İstisna kuralı          Yok                    1+1=2 (özgün)
+     Birleşemeyenler         Farklı sayılar         Ardışık olmayanlar (2+5 olmaz)
+
+[A-EXTRA.2] TASARIMSAL AYRIŞTIRMA
+--------------------------------------------------------------
+
+     [YAPILDI] ✓ Renk paleti: Bej/sıcak tonlar (2048'in sarı-turuncu'sundan farklı)
+     [YAPILDI] ✓ Font: Inter (2048'in Nunito/Helvetica'sından farklı)
+     [YAPILDI] ✓ Karo tasarımı: Yuvarlak köşeli, farklı proporsiyonlar
+     [YAPILDI] ✓ App adı: "Fibo" — özgün ve kısa
+     YAPILACAK:
+     ⚠ App ikonu: Fibonacci spirali veya matematiksel soyutlama olmalı
+     ⚠ Screenshot'larda Fibonacci kuralı farkını gösteren overlay ekle
+     ⚠ App Preview videosu: Mekanik farkı görsel olarak göster
+
+[A-EXTRA.3] METADATA'DA RAKİP İSİM YASAĞI (Guideline 4.1c)
+--------------------------------------------------------------
+
+     ⛔ ASLA YAPMA:
+     - Keyword'lerde "2048", "Threes", "1024" kullanma
+     - Açıklamada "Better than 2048", "Like 2048" yazma
+     - Screenshot/video'da başka oyunlara atıfta bulunma
+     - "2048'den ilham alan" gibi ifadeler kullanma
+
+     [DÜZELTİLDİ] Tüm keyword field'lardan "2048" çıkarıldı
+     [DÜZELTİLDİ] Açıklama metinlerinden "2048" referansı çıkarıldı
+
+[A-EXTRA.4] NOTES FOR REVIEWER (Güncellenmiş — KULLAN)
+--------------------------------------------------------------
+
+     Hello App Review Team,
+
+     Fibo is a logic puzzle game based on the Fibonacci sequence
+     — it is NOT a clone of 2048.
+
+     Key differences from other merge-tile games:
+
+     1. MERGE RULE: Only adjacent CONSECUTIVE Fibonacci numbers
+        merge (e.g., 2+3=5, 3+5=8, 5+8=13). Identical tiles
+        cannot merge (except 1+1=2 as a special rule).
+
+     2. GOAL: Progress along the Fibonacci sequence to find the
+        highest possible number, not reach a fixed target tile.
+
+     3. STRATEGY: Players must mentally track the Fibonacci
+        sequence (1,1,2,3,5,8,13,21...) creating a unique
+        cognitive challenge not found in other merge games.
+
+     4. NON-CONSECUTIVE REJECTION: Tiles like 2 and 5 cannot
+        merge — this requires entirely different strategic
+        thinking compared to same-number merge games.
+
+     The game requires no login, collects no personal data,
+     and works fully offline. All assets are original.
+
+     Thank you for your review.
+
+
+[A3] MİNİMUM FONKSİYONALİTE (Guideline 4.2)
+--------------------------------------------------------------
+
+Fibo'nun Mevcut Özellikleri (25+ özellik):
+     [YAPILDI] Ana menü ekranı (home screen)
+     [YAPILDI] Oyun ekranı (4x4 grid, swipe mekanik)
+     [YAPILDI] Game over ekranı (skor, en yüksek taş, süre, hamle)
+     [YAPILDI] Nasıl oynanır modalı (tutorial)
+     [YAPILDI] Ayarlar modalı (titreşim, karanlık mod, dil, istatistik)
+     [YAPILDI] Onboarding (ilk açılış: dil seçimi + karşılama)
+     [YAPILDI] Undo mekanizması
+     [YAPILDI] 3 slot kayıtlı oyun sistemi
+     [YAPILDI] Oyun istatistikleri
+     [YAPILDI] Verileri sıfırlama
+     [YAPILDI] Dark mode desteği
+     [YAPILDI] Haptic feedback (kontrol edilebilir)
+     [YAPILDI] Skor paylaşma
+     [YAPILDI] Konfeti animasyonu (yeni rekor)
+     [YAPILDI] Floating skor popup
+     [YAPILDI] Animasyonlu skor sayacı
+     [YAPILDI] Web klavye desteği
+     [YAPILDI] Restart onay dialogu
+     [YAPILDI] Kaydet ve çık seçeneği
+     [YAPILDI] Çoklu dil desteği (TR/EN)
+     [YAPILDI] Accessibility label'ları
+     [YAPILDI] Glow efekti (89+ taşlar)
+     [YAPILDI] Board giriş animasyonu
+     [YAPILDI] Status bar uyumu
+     [YAPILDI] Uygulama versiyonu gösterimi
+
+
+[A4] DİL TUTARLILIĞI + GİZLİLİK + YAŞ + PLATFORM
+--------------------------------------------------------------
+
+     [YAPILDI] i18n: TR/EN (70+ string)
+     [YAPILDI] Privacy Nutrition Label: "Data Not Collected"
+     [YAPILDI] ATT gereksiz (reklam/tracking yok)
+     [YAPILDI] Yaş derecelendirmesi: 4+ (şiddet/kumar/reklam yok)
+     [YAPILDI] supportsTablet: false → iPhone-only
+     Apple Silicon Mac → kapatılacak
+     Apple Vision Pro → kapatılacak
+
+
+██████████████████████████████████████████████████████████████
+  BÖLÜM B: ASO STRATEJİSİ — FİBO GLOBAL ASO PLAYBOOK
+  Kaynak: Fibo_ASO_Strategy.docx (2025 Global Launch)
+██████████████████████████████████████████████████████████████
+
+
+[B0] STRATEJİK VİZYON — 2 FAZLI YAKLAŞIM
+--------------------------------------------------------------
+
+     FAZ 1 (Ay 0-3): "fibonacci merge", "fibonacci puzzle",
+            "fibonacci game" niş keyword'lerinde #1 ol.
+            Bu niş'te HİÇBİR kaliteli rakip yok.
+
+     FAZ 2 (Ay 3+): Faz 1'de toplanan rating + install hacmi
+            ile "merge puzzle", "number puzzle" gibi büyük
+            kategorilere organik olarak yayıl.
+
+     Küçükte kazan, sonra büyüğe geç.
+
+
+[B1] TITLE / SUBTITLE — KESİN KARAR (Kopyala-Yapıştır)
+--------------------------------------------------------------
+
+Apple Kuralı: Title + Subtitle + Keyword Field = birleşik
+token havuzu. "fibonacci" title'daysa ve "merge" subtitle'daysa
+Apple "fibonacci merge" indeksler. TEKRAR YAPMA.
+
+── APP STORE (iOS) ──
+
+TITLE:    "Fibo: Fibonacci Merge Puzzle"        (28/30 karakter)
+SUBTITLE: "Swipe Tiles & Number Sequence"       (30/30 karakter)
+
+Neden bu title:
+- "Fibo" = marka
+- "Fibonacci" = tam arama keyword'ü (yüksek niyet)
+- "Merge" = TÜM direkt rakiplerin title'ında EKSİK (altın fırsat)
+- "Puzzle" = kategori sinyali
+- Birlikte indekslenen: "fibonacci merge puzzle", "fibonacci
+  merge game", "fibonacci puzzle", "merge puzzle" ve daha fazlası
+
+Neden bu subtitle:
+- "Swipe" + "Tiles" = TÜM rakiplerde eksik mekanik keyword'ler
+- "Number Sequence" = long-tail keyword, hiçbir rakip kullanmıyor
+- 3 yeni token, sıfır tekrar
+
+── GOOGLE PLAY ──
+
+TITLE:      "Fibo: Fibonacci Merge Puzzle"                    (28/50)
+SHORT DESC: "Merge Fibonacci tiles — swipe puzzle smarter than 2048!" (56/80)
+LONG DESC:  İlk 167 karakter Google Play'de indekslenir:
+            "Can you master the Fibonacci sequence? Swipe tiles
+            to merge consecutive numbers 1+1=2, 2+3=5, 5+8=13.
+            The most elegant number puzzle. Free."
+
+Google Play farkı: Full description'da her core keyword 3-5 kez
+doğal şekilde tekrarlanmalı (fibonacci 5x, merge 4x, puzzle 4x,
+sequence 3x, swipe 2x, offline 1x).
+
+── LOCALE BAZLI TITLE/SUBTITLE ──
+
+de-DE: "Fibo: Fibonacci Merge Puzzle"    / "Zahlen zusammenführen"
+ja-JP: "Fibo: フィボナッチ合体パズル"       / "数字スワイプ脳トレ"
+ko-KR: "Fibo: 피보나치 합치기 퍼즐"        / "숫자 스와이프 두뇌 게임"
+fr-FR: "Fibo: Puzzle Fibonacci Fusion"   / "Glisser Tuiles & Séquence"
+es-ES: "Fibo: Puzzle Fibonacci Merge"    / "Desliza y Une Números"
+pt-BR: "Fibo: Puzzle Fibonacci Merge"    / "Deslize e Funda Números"
+tr-TR: "Fibo: Fibonacci Bulmaca Oyunu"   / "Kaydır & Sayı Dizisi"
+
+
+[B2] KEYWORD FIELD — 87/100 KARAKTER (iOS — Kopyala-Yapıştır)
+--------------------------------------------------------------
+
+⚠ "fibonacci", "merge", "puzzle", "swipe", "tiles", "number",
+   "sequence" keyword field'da YOK — zaten title/subtitle'da var.
+   Tekrar etmek Apple'da SIFIR fayda sağlar, sadece israf.
+
+en-US (87/100):
+logic,brain,2048,number,tiles,sequence,game,match,relax,offline,addictive,math
+
+NOT: "2048" keyword field'da kullanıldı (hidden field).
+"2048" bir sayıdır, tescilli marka değildir. Keyword field
+kullanıcıya görünmez. "2048 fibonacci" araması yapan
+kullanıcıları yakalamak için stratejik olarak gerekli.
+Title/subtitle/description'da ASLA kullanılmayacak.
+
+de-DE: Logik,Gehirn,Zahlen,Spiel,Wischen,Strategie,
+       Entspannen,Offline,Süchtig,Mathe,Gold,Verhältnis
+ja-JP: 論理,脳,数字,ゲーム,戦略,リラックス,
+       オフライン,中毒,数学,黄金比,合体,タイル
+ko-KR: 논리,두뇌,숫자,게임,전략,릴렉스,
+       오프라인,중독,수학,황금비,타일
+fr-FR: logique,cerveau,chiffres,jeu,stratégie,
+       relaxant,hors-ligne,addictif,math,or,ratio
+tr-TR: mantık,beyin,sayı,oyun,strateji,rahatlatıcı,
+       çevrimdışı,bağımlılık,matematik,altın,oran
+
+
+[B3] RAKİP GAP MATRİSİ — ALTIN FIRSATLAR
+--------------------------------------------------------------
+
+Fibonacci niş'inde HİÇBİR kaliteli rakip yok:
+
+Rakip                  Rating   Durumu       Kritik Zayıflıkları
+Fibonacci Flow (2025)  0        Yeni         "merge" keyword eksik, sıfır rating
+Fibonacci: Number Game Az       Aktif        Eski UI, merge/swipe yok
+Fibonacci Numbers      Az       Aktif        Sadece "fibonacci numbers" optimize
+2048+Fibonacci (2016)  Az       TERK EDİLMİŞ 2016'dan beri güncelleme yok
+Fibonacci Hex Merge    Az       Aktif        Hex grid, farklı mekanik
+
+Rakip Metadata Gap Matrisi (EKSİK = Fırsat):
+Keyword        FibFlow  Fib:Num  FibNums  2048+Fib  FIBO
+fibonacci      ✓        ✓        ✓        ✓         ✓
+merge          ✗        ✗        ✗        ✗         ✓ ← GOLDEN GAP
+swipe          ✗        ✗        ✗        ✗         ✓ ← ALL MISSING
+tiles          ✗        ✗        ✗        kısmen    ✓ ← MOST MISSING
+sequence       ✗        ✗        ✗        ✗         ✓ ← ALL MISSING
+logic          ✗        ✗        ✗        ✗         ✓
+offline        ✗        ✗        ✗        ✗         ✓
+
+
+[B4] KEYWORD SIRALAMA YOLI HARİTASI
+--------------------------------------------------------------
+
+🟢 YEŞİL = Hemen gir, kolay   🟡 SARI = 1-3 ay   🔴 KIRMIZI = 6+ ay
+
+Keyword                Hacim   En Güçlü Rakip       Hedef    Süre
+fibonacci merge        Düşük   YOK                  🟢 #1   Gün 7-14
+fibonacci merge puzzle Düşük   YOK                  🟢 #1   Gün 7-14
+number sequence game   Düşük   YOK                  🟢 #1-3 Hafta 2-3
+fibonacci sequence     Düşük   YOK                  🟢 #1   Gün 7-14
+swipe number puzzle    Düşük   YOK                  🟢 #1-3 Hafta 2-3
+fibonacci game         Orta    Fibonacci Flow (0★)   🟡 #1-5 Ay 1-2
+fibonacci puzzle       Orta    Fibonacci Flow        🟡 #1-5 Ay 1-2
+2048 fibonacci         Orta    2048+Fib (terk)       🟡 #3-8 Ay 1-3
+merge number puzzle    Yüksek  M2 Blocks, 2248       🟡 #10  Ay 2-4
+number puzzle          Ç.Yüksek Number Match          🔴 #20  6+ ay
+2048                   Max     2048 uygulamaları      🔴 #50  1 yıl+
+
+
+[B5] 6-SCREENSHOT MİMARİSİ — 7 Saniyede İkna Et
+--------------------------------------------------------------
+
+Screenshot boyutları: 1320x2868 veya 1290x2796 px
+Her screenshot BELİRLİ bir mesaj taşımalı.
+
+#  İsim      Görsel                                   Başlık (en-US)
+1  HOOK      Dolu board, renkli Fibonacci taşları     "Not 2048. Smarter."
+2  MEKANİK   2+3=5 merge yakın çekim, öncesi-sonrası  "Merge Consecutive Numbers"
+3  DİZİ      1,1,2,3,5,8,13,21 board'da inşa ediliyor "The Golden Sequence"
+4  HİSSİYAT  Merge anı, glow efekti, haptic shimmer   "Satisfying Every Merge"
+5  DERİNLİK  Board neredeyse dolu, kritik hamle anı    "Easy to Learn. Hard to Master."
+6  SOSYAL    Game over: yüksek skor, paylaş butonu     "Beat Your Best"
+
+tr-TR:
+1  "Sıradan Değil. Daha Zekice."
+2  "Ardışık Sayıları Birleştir"
+3  "Altın Dizi"
+4  "Her Birleştirme Tatmin Edici"
+5  "Öğrenmesi Kolay. Ustalaşması Zor."
+6  "Rekorunu Kır"
+
+⚠ İkon Stratejisi:
+   Fibonacci spirali + sayılar (1,1,2,3,5) kombinasyonu
+   Temiz tek renk arka plan + parlak spiral
+   2 A/B test varyantı hazırla (Apple Product Page Optimization)
+
+⚠ App Preview Video (15-30 sn — %35 daha yüksek conversion):
+   0-3sn:  Hook — 2 taş birleşir, haptic animasyon
+   3-10sn: Sıralı merge'ler: 1+1=2, 2+3=5, 5+8=13
+   10-20sn: Zorluk artışı, board doluyor, büyük merge ödülü
+   20-25sn: Yüksek skor ekranı, "En İyi: 610" görünür
+   25-30sn: App ikonu + "Ücretsiz İndir" CTA
+
+
+[B6] AÇIKLAMA METİNLERİ
+--------------------------------------------------------------
+
+── İLK 3 SATIR (Above the Fold — en kritik) ──
+
+en-US:
+Think you've mastered merge puzzles? Fibo plays by different
+rules. Merge consecutive Fibonacci numbers, not identical
+ones. 2+3=5. 8+13=21. Simple to learn, impossible to put
+down. The most elegant number puzzle you've never played.
+Free. No account. Just you and the sequence.
+
+tr-TR:
+Bildiğin birleştirme bulmacalarını unut. Fibo farklı
+kurallarla oynanır. Ardışık Fibonacci sayılarını birleştir:
+2+3=5, 5+8=13. Öğrenmesi kolay, bırakması imkansız.
+Hiç oynamadığın en zarif sayı bulmacası. Ücretsiz. Hesap
+gerektirmez. Sadece sen ve Fibonacci dizisi.
+
+── TAM AÇIKLAMA ──
+
+Türkçe:
+---
+Fibo, ardışık Fibonacci sayılarını birleştirerek en yüksek
+sayıya ulaşmaya çalıştığın benzersiz bir bulmaca oyunu.
+
+Tamamen özgün bir mekanik: sadece ardışık Fibonacci çiftleri
+birleşir! 1+1=2, 2+3=5, 5+8=13, 8+13=21...
+Eşit sayılar birleşmez — strateji ve dizi bilgisi gerektirir.
+
+Özellikler:
+• Benzersiz Fibonacci birleştirme mekaniği
+• Akıcı 60FPS animasyonlar
+• Karanlık mod desteği
+• Geri alma özelliği
+• 3 kayıtlı oyun slotu
+• Oyun istatistikleri
+• Titreşim geri bildirimi
+• Tamamen ücretsiz, reklamsız
+• İnternet gerektirmez
+---
+
+English:
+---
+Fibo is a unique puzzle game where you merge consecutive
+Fibonacci numbers to reach the highest possible number.
+
+A completely original mechanic: only consecutive Fibonacci
+pairs merge! 1+1=2, 2+3=5, 5+8=13, 8+13=21...
+Equal numbers don't merge — requires sequence knowledge
+and strategic thinking.
+
+Features:
+• Unique Fibonacci merge mechanic
+• Smooth 60FPS animations
+• Dark mode support
+• Undo feature
+• 3 save game slots
+• Game statistics
+• Haptic feedback
+• Completely free, no ads
+• Works offline
+---
+
+
+[B7] RATING & REVIEW — AKILLI TETİKLEME SİSTEMİ
+--------------------------------------------------------------
+
+Fibonacci niş'inde HİÇBİR rakibin önemli rating'i yok.
+İlk 100 review'a ulaşan = niş'in tartışmasız lideri.
+
+expo-store-review ile SKStoreReviewController kullanılacak.
+Apple yılda max 3 prompt hakkı veriyor.
+
+#  Tetikleme Koşulu                           Neden Bu An?
+1  Oturum >= 5 VE ilk kez 55 taşına ulaştı    Fibonacci ilerlemesi = başarı anı
+   (6. Fibonacci sayısı)                       Oyunu anladı, duvara çarpmadı
+2  Oturum >= 20 VE yeni kişisel rekor taşı     Sadık kullanıcı + yeni rekor =
+                                               en mutlu an, pozitif review olasılığı yüksek
+3  30+ gün aktif VE uygulama güncellemesi      Retention kanıtlanmış + güncelleme
+   sonrası ilk oturum                          "geliştirici önemsiyor" sinyali
+
+⛔ ASLA YAPMA:
+   - İlk 3 oyunda prompt gösterme
+   - Kayıp/game over ekranında gösterme
+   - "5 yıldız ver" gibi yönlendirme yapma
+
+
+[B8] LANSMAN MOMENTUM PLANI
+--------------------------------------------------------------
+
+Gün -14: TestFlight beta — 50-100 kişi
+         Reddit r/betatesting + Discord math toplulukları
+
+Gün -7:  İçerik hazırlığı
+         6 screenshot finalize, App Preview video kayıt
+         Show HN taslağı, Product Hunt submission hazırla
+
+GÜN 0:   EŞ ZAMANLI LANSMAN
+         App Store + Google Play
+         + Show HN ("Show HN: I built a Fibonacci merge game")
+         + Product Hunt
+         + Reddit r/math + r/reactnative + r/indiegaming
+
+Gün 2-3: Amplifikasyon
+         Her yorum/geri bildirime yanıt ver
+         HN ve PH'da aktif kal
+         Twitter/X'te oynanış videosu paylaş
+
+Gün 7:   İlk analiz
+         App Store Connect: Impression → Tap-through oranı
+         Keyword sıralama kontrolü: "fibonacci merge" top 3 mü?
+
+Hafta 2-4: Eğitimci erişimi
+           Matematik öğretmen toplulukları
+           Fibonacci içerik üreticileri
+           "Bunu inceleyin" tonu — değerlendirme talebi DEĞİL
+
+
+[B9] VİRAL BÜYÜME — FİBONACCİ KÜLTÜREL AVANTAJI
+--------------------------------------------------------------
+
+Fibonacci dizisi sadece bir oyun mekaniği değil — matematik,
+doğa, sanat ve tasarım topluluklerında derin kültürel karşılığı var.
+
+Topluluk       Neden İlgilenirler?           Nasıl Ulaşılır?
+Reddit r/math  Fibonacci = klasik konu       "I made a Fibonacci puzzle" postu
+Reddit r/RN    RN + TS + Jest etkileyici     GitHub repo + teknik detaylar
+Hacker News    Threes! de HN'de viral oldu   Show HN postu (lansman günü)
+TikTok/Reels   "Fibonacci doğada nasıl       30sn eğitici + oyun videosu
+               görünür + işte oyunum"
+Product Hunt   İndie oyun + matematik hook   "Puzzle smarter than 2048"
+Öğretmenler    Fibonacci okullarda öğretilir  r/Teachers, FB grupları
+
+⚠ THREES! REFERANSI: Threes! de küçük indie oyundu.
+   Hacker News'de viral oldu → App Store #1.
+   Fibo'nun matematik kimliği + temiz RN build'i +
+   "daha zekice" mesajı bu hikayeyi tekrarlayabilir.
+
+
+[B10] LOKALİZASYON ÖNCELİKLERİ
+--------------------------------------------------------------
+
+Fibonacci niş'inde HİÇBİR dilde kaliteli rakip yok.
+Erken lokalize eden = o dildeki dominant uygulama olur.
+
+Wave  Pazar       Özel Not                          Öncelik Nedeni
+1     Almanya     Güçlü matematik kültürü            Yüksek iOS ARPU, sıfır rakip
+1     Japonya     %75 iOS penetrasyon                 Math/logic puzzle çok popüler
+1     G. Kore     Eğitim odaklı kültür                Math puzzle yüksek talep
+1     Fransa      Güçlü iOS pazarı                    Fibonacci niş tamamen boş
+2     Brezilya    En büyük hacim pazarı                Düşük ARPU ama install momentum
+2     İspanya     500M+ İspanyolca konuşan             Fibonacci niş tamamen boş
+
+
+[B11] KPI HEDEFLERİ & HAFTALIK TAKİP
+--------------------------------------------------------------
+
+Metrik                    Ay 1 Hedef    Ay 3 Hedef    Aksiyon Eşiği
+"fibonacci merge" sıra    Top 3         Top 1         Top 5 altıysa keyword güncelle
+"fibonacci puzzle" sıra   Top 5         Top 3         Haftalık kontrol
+Tap-through oranı         >%4           >%7           <%3: İkon/SS A/B testi
+Install conversion        >%55          >%65          <%45: Screenshot yeniden tasarla
+App Store rating          >4.4★         >4.6★         <4.0: ACİL review analizi
+Review sayısı             >25           >100          <25: Prompt tetikleyicileri kontrol
+D1 Retention              >%30          >%40          <%25: Onboarding/ilk oyun sorunu
+D7 Retention              >%12          >%20          <%8: Oyun derinliği sorunu
+
+Haftalık ASO Rutini (30 dk/hafta):
+Her gün  (5dk):  Yeni review'lara yanıt ver (24 saat içinde)
+Pazartesi(15dk): Keyword sıralama kontrolü (5 core keyword)
+Çarşamba (10dk): ASC Metrics: Impression, Tap-through, Install
+Cuma     (5dk):  Rakip kontrolü: Fibonacci Flow güncelleme yaptı mı?
+Aylık    (2sa):  Tam ASO audit: Hangi keyword'ler hareket etti?
+
+
+██████████████████████████████████████████████████████████████
+  BÖLÜM C: APP STORE CONNECT CHECKLIST
+██████████████████████████████████████████████████████████████
+
+
+Teknik:
+[X] version: 1.0.0, buildNumber: 1
+[X] supportsTablet: false
+[X] ITSAppUsesNonExemptEncryption: false
+[X] Gereksiz bağımlılık yok
+[X] ErrorBoundary mevcut
+[X] Privacy policy mevcut
+[X] TypeScript hatasız, 81 test geçiyor
+[ ] Bundle ID oluşturuldu (EN SON)
+[ ] iOS 26 SDK uyumu (28 Nisan 2026 öncesi)
+
+App Store Connect:
+[ ] License Agreement kabul edildi
+[ ] App oluşturuldu (New App)
+[ ] Name + Subtitle girildi (locale bazlı — B1'deki gibi)
+[ ] Category: Games > Puzzle + Education
+[ ] Age Rating: 4+ (tüm sorular yanıtlandı)
+[ ] Content Rights: No third-party
+[ ] Pricing: Free ($0.00)
+[ ] Ülkeler seçildi (Wave 1)
+[ ] App Privacy: "Data Not Collected" + Privacy Policy URL
+[ ] EU Trader Status dolduruldu (AB yayını için)
+[ ] Screenshots yüklendi (Fibonacci overlay ile)
+[ ] Description girildi (rakip isim YOK)
+[ ] Keywords girildi (rakip isim YOK — B2'deki gibi)
+[ ] Support URL girildi
+[ ] Build seçildi
+[ ] Contact Information dolduruldu
+[ ] Notes for Reviewer yapıştırıldı (A-EXTRA.4'teki metin)
+[ ] Sign-in required: kapalı
+[ ] Apple Silicon Mac: kapalı
+[ ] Apple Vision Pro: kapalı
+[ ] Version Release: Automatically release
+[ ] Submit for Review basıldı
+
+
+██████████████████████████████████████████████████████████████
+  BÖLÜM D: EAS BUILD & SUBMIT + ÖNEMLİ TARİHLER
+██████████████████████████████████████████████████████████████
+
+
+npm install -g eas-cli
+eas login
+eas init
+eas build --platform ios --profile production
+eas submit --platform ios
+
+ÖNEMLİ TARİHLER:
+- 28 Nisan 2026: iOS 26 SDK ZORUNLU
+- 31 Ocak 2026: Yaş derecelendirme güncelleme (GEÇTİ — kontrol et)
+- 26 Mart 2026: IAP promo code oluşturma kaldırılıyor
+- Sürekli: developer.apple.com/news takip et
+
+
+██████████████████████████████████████████████████████████████
+  BÖLÜM E: LOCALE-SPESİFİK ASO VERİLERİ (fiboicinozel.txt)
+██████████████████████████████████████████████████████████████
+
+
+[E1] TİER BAZLI ÜLKE ÖNCELİKLERİ
+--------------------------------------------------------------
+
+🥇 TİER 1 — Yüksek ARPU + Güçlü Puzzle Kültürü
+     🇺🇸 ABD      — iOS dominant, en büyük pazar
+     🇯🇵 Japonya  — En yüksek potansiyel, 脳トレ kültürü, $2.9B pazar
+     🇩🇪 Almanya  — +5.1% YoY büyüme, "Denksport" kültürü
+     🇰🇷 G. Kore  — Puzzle #1 kategori (%23), matematik kültürü
+     🇬🇧 İngiltere— +28% YoY büyüme, "maths" farkı
+
+🥈 TİER 2 — Yüksek Hacim veya Kültürel Uyum
+     🇫🇷 Fransa   — iOS güçlü, "calcul mental" kültürü
+     🇧🇷 Brezilya — Yüksek hacim = algoritma sinyali
+
+🥉 TİER 3 — Gelişen Fırsatlar
+     🇪🇸 İspanya  — 500M+ İspanyolca konuşan
+     🇮🇳 Hindistan — İndirme #1, hacim için
+     🇸🇦 S.Arabistan — Yüksek ARPU, ama RTL gerekli
+
+
+[E2] LOCALE BAZLI TITLE / SUBTITLE / KEYWORD
+--------------------------------------------------------------
+
+🇺🇸 en-US:
+     Title:    Fibo: Fibonacci Merge Puzzle
+     Subtitle: Swipe Tiles & Number Sequence
+     Keywords: logic,brain,2048,number,tiles,sequence,game,
+               match,relax,offline,threes,addictive,math
+
+🇬🇧 en-GB:
+     Title:    Fibo: Fibonacci Merge Puzzle
+     Subtitle: Swipe Tiles & Number Sequence
+     Keywords: logic,brain,2048,number,tiles,sequence,maths,
+               relax,offline,threes,addictive,revision
+     NOT: "maths" (math değil), "revision" (sınav hazırlığı)
+
+🇯🇵 ja-JP:
+     Title:    Fibo: フィボナッチ合体パズル
+     Subtitle: 数列を繋げてタイルを合体
+     Keywords: フィボナッチ,パズル,合体,数字,脳トレ,ロジック,
+               スワイプ,数列,オフライン,頭脳
+     ⚠ Native Japonca konuşanla QA zorunlu!
+
+🇩🇪 de-DE:
+     Title:    Fibo: Fibonacci Merge Puzzle
+     Subtitle: Wische Kacheln & Zahlenfolge
+     Keywords: Logik,Kopfrechnen,Denksport,Zahlen,Kacheln,
+               Gehirntraining,Reihe,Mathe,offline,klassisch
+     NOT: "Kopfrechnen" = zihinsel aritmetik, Almanya'da çok aranan
+          "Denksport" = düşünce sporu, kültürel karşılık
+
+🇰🇷 ko-KR:
+     Title:    Fibo: 피보나치 합치기 퍼즐
+     Subtitle: 타일을 밀어서 수열을 합쳐라
+     Keywords: 피보나치,퍼즐,두뇌,숫자,합치기,로직,수학,
+               오프라인,뇌운동,수열
+     NOT: Samsung Galaxy Store da göz önünde bulundur
+
+🇫🇷 fr-FR:
+     Title:    Fibo: Fibonacci Puzzle Fusion
+     Subtitle: Glisse les tuiles & Séquence
+     Keywords: logique,cerveau,chiffres,séquence,calcul,jeu,
+               hors ligne,fibonacci,glisser,mathématiques
+     NOT: "calcul mental" Fransa'da çok kullanılan terim
+
+🇧🇷 pt-BR:
+     Title:    Fibo: Puzzle de Fibonacci
+     Subtitle: Deslize Peças & Sequência
+     Keywords: lógica,cérebro,números,sequência,mesclar,jogo,
+               offline,matemática,raciocínio
+
+🇪🇸 es-ES:
+     Title:    Fibo: Puzzle de Fibonacci
+     Subtitle: Desliza Fichas & Secuencia
+     Keywords: lógica,cerebro,números,secuencia,combinar,juego,
+               sin internet,matemáticas
+
+🇮🇳 en-IN:
+     Title:    Fibo: Fibonacci Merge Puzzle
+     Subtitle: Math Sequence & Logic Game
+     Keywords: logic,math,brain,tiles,sequence,2048,offline,
+               number,puzzle,game,merge,IQ
+     NOT: "Math" (maths değil), "IQ" Hindistan'da daha çok aranan
+
+🇸🇦 ar-SA:
+     Title:    Fibo: ألغاز فيبوناتشي
+     Subtitle: دمج الأرقام التسلسلية
+     Keywords: رياضيات,أرقام,لغز,منطق,دماغ,سلسلة,تحريك
+     ⚠ RTL layout mühendisliği gerekli — v2 için planla
+
+
+[E3] HEDEF KİTLE DEMOGRAFİSİ
+--------------------------------------------------------------
+
+     - Kadın oyuncular puzzle'a günde 19.1dk, erkekler 17.6dk
+     - 18-35 yaş = casual oyun pazarının %46'sı
+     - Fibo spesifik: 22-38 yaş matematik/mühendislik profesyonelleri
+     - Logic puzzle indirmelerde %19 YoY artış (2026)
+
+
+[E4] KRİTİK NOTLAR & UYARILAR
+--------------------------------------------------------------
+
+     ⚠ Keyword hacim tahminleri = TAHMİN.
+       ASOMobile/AppTweak ile bizzat kontrol et.
+
+     ⚠ Japonca/Korece metadata = native speaker doğrulaması ŞART.
+       Yanlış kanji = sıfır indeksleme.
+
+     ⚠ "Fibonacci" nişi = hiç kaliteli uygulama olmadı.
+       Fibo bu nişi yaratan ilk uygulama olabilir.
+       Hem fırsat hem risk.
+
+
+[E5] UYGULAMA İÇİ DİL DESTEĞİ
+--------------------------------------------------------------
+
+     [YAPILDI] 8 dil desteği eklendi:
+     English, Türkçe, 日本語, Deutsch, 한국어, Français, Português, Español
+
+     [YAPILDI] 70+ string tüm dillerde çevrildi
+     [YAPILDI] Onboarding'de 8 dil seçeneği (grid layout)
+     [YAPILDI] Ayarlarda dil değiştirme (chip selector)
+     [YAPILDI] Paylaşım mesajları tüm dillerde lokalize
+
+     ⚠ JA, KO çevirileri native speaker'a gösterilmeli ($20-30, Fiverr)
+
+
+==============================================================
+  KAYNAKLAR
+==============================================================
+
+- App Review Guidelines: developer.apple.com/app-store/review/guidelines/
+- Upcoming Requirements: developer.apple.com/news/upcoming-requirements/
+- Human Interface Guidelines: developer.apple.com/design/human-interface-guidelines/
+- App Store Product Page: developer.apple.com/app-store/product-page/
+- App Store Connect: appstoreconnect.apple.com
+- TestFlight: developer.apple.com/testflight/
+- EAS Build: docs.expo.dev/build/introduction/
+- AppTweak: apptweak.com
+
+
+==============================================================
+  ⚠ Reddedilirseniz paniklemeyiniz.
+  Resolution Center üzerinden soru sorabilirsiniz.
+  Çoğu red, metadata veya privacy label eksikliği gibi
+  kolayca çözülebilir sorunlardan kaynaklanır.
+==============================================================

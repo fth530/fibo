@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const SETTINGS_KEY = '@fibo_settings';
 
 export type ThemeMode = 'light' | 'dark';
-export type Language = 'tr' | 'en';
+export type Language = 'tr' | 'en' | 'ja' | 'de' | 'ko' | 'fr' | 'pt' | 'es';
 
 export interface Settings {
   hapticEnabled: boolean;
