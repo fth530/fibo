@@ -8,6 +8,7 @@ export type Language = 'tr' | 'en' | 'ja' | 'de' | 'ko' | 'fr' | 'pt' | 'es';
 
 export interface Settings {
   hapticEnabled: boolean;
+  soundEnabled: boolean;
   theme: ThemeMode;
   language: Language;
   hasSeenTutorial: boolean;
@@ -16,6 +17,7 @@ export interface Settings {
 
 const DEFAULT_SETTINGS: Settings = {
   hapticEnabled: true,
+  soundEnabled: true,
   theme: 'light',
   language: 'tr',
   hasSeenTutorial: false,

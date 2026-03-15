@@ -6,6 +6,7 @@ import {
   Text,
   Pressable,
   Platform,
+  ScrollView,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -95,6 +96,8 @@ export function HowToPlayModal({ visible, onClose, theme }: HowToPlayModalProps)
         <Animated.View style={[styles.card, { backgroundColor: theme.modalBg }, cardStyle]}>
           <View style={styles.handle} />
 
+          <ScrollView showsVerticalScrollIndicator={false} bounces={false}>
+          <View style={{ gap: 20 }}>
           <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>{t.howToPlayTitle}</Text>
 
           <View style={styles.rulesList}>
@@ -146,6 +149,8 @@ export function HowToPlayModal({ visible, onClose, theme }: HowToPlayModalProps)
           >
             <Text style={[styles.closeBtnText, { color: theme.restartBtnText }]}>{t.gotIt}</Text>
           </Pressable>
+          </View>
+          </ScrollView>
         </Animated.View>
       </View>
     </Modal>
@@ -164,7 +169,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingTop: 12,
-    paddingHorizontal: 28,
+    paddingHorizontal: 20,
     paddingBottom: Platform.OS === 'web' ? 40 : 36,
     gap: 20,
     ...Platform.select({
@@ -230,15 +235,15 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   exTile: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     borderRadius: 7,
     alignItems: 'center',
     justifyContent: 'center',
   },
   exTileText: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 11,
+    fontSize: 10,
   },
   mathOp: {
     fontFamily: 'Inter_600SemiBold',

@@ -6,12 +6,15 @@ import {
   Pressable,
   Platform,
   Alert,
+  ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import type { ThemeColors } from '@/constants/colors';
 import type { SavedGame } from '@/hooks/useSavedGames';
+import type { DailyChallenge } from '@/hooks/useDailyChallenge';
 import { useT } from '@/constants/i18n';
 
 interface HomeScreenProps {
@@ -19,9 +22,11 @@ interface HomeScreenProps {
   isDark: boolean;
   bestScore: number;
   slots: (SavedGame | null)[];
+  daily: DailyChallenge | null;
   onNewGame: () => void;
   onContinueGame: (slotIndex: number) => void;
   onDeleteGame: (slotIndex: number) => void;
+  onPlayDaily: () => void;
   onOpenSettings: () => void;
 }
 
@@ -39,13 +44,16 @@ export function HomeScreen({
   isDark,
   bestScore,
   slots,
+  daily,
   onNewGame,
   onContinueGame,
   onDeleteGame,
+  onPlayDaily,
   onOpenSettings,
 }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const t = useT();
+  const { width } = useWindowDimensions();
   const topInset = Platform.OS === 'web' ? 67 : insets.top;
   const bottomInset = Platform.OS === 'web' ? 34 : insets.bottom;
 
@@ -69,12 +77,12 @@ export function HomeScreen({
   });
 
   return (
-    <View style={[styles.container, { paddingTop: topInset + 20, paddingBottom: bottomInset + 16, backgroundColor: theme.background }]}>
+    <View style={[styles.container, { paddingTop: topInset + 20, paddingBottom: bottomInset + 16, backgroundColor: theme.background, paddingHorizontal: Math.max(16, width * 0.05) }]}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
 
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={[styles.logo, { color: theme.textPrimary }]}>fibo</Text>
+      <View style={[styles.header, { marginBottom: Math.min(28, width * 0.07) }]}>
+        <Text style={[styles.logo, { color: theme.textPrimary, fontSize: Math.min(56, width * 0.15) }]}>fibo</Text>
         <Text style={[styles.tagline, { color: theme.textMuted }]}>{t.subtitle}</Text>
 
         {bestScore > 0 && (
@@ -90,15 +98,50 @@ export function HomeScreen({
         onPress={onNewGame}
         style={({ pressed }) => [
           styles.newGameBtn,
-          { backgroundColor: theme.restartBtn, opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] },
+          { backgroundColor: theme.restartBtn, opacity: pressed ? 0.88 : 1, transform: [{ scale: pressed ? 0.97 : 1 }], paddingVertical: Math.min(18, width * 0.045) },
         ]}
       >
         <Ionicons name="add-circle-outline" size={22} color={theme.restartBtnText} />
         <Text style={[styles.newGameText, { color: theme.restartBtnText }]}>{t.newGame}</Text>
       </Pressable>
 
+      {/* Daily Challenge */}
+      {daily && (
+        <Pressable
+          onPress={onPlayDaily}
+          style={({ pressed }) => [
+            styles.dailyCard,
+            { backgroundColor: theme.scoreCard, opacity: pressed ? 0.85 : 1 },
+            shadowStyle,
+          ]}
+        >
+          <View style={styles.dailyLeft}>
+            <View style={styles.dailyHeader}>
+              <Ionicons name="calendar" size={18} color="#FF8C50" />
+              <Text style={[styles.dailyTitle, { color: theme.textPrimary }]}>{t.dailyChallenge}</Text>
+            </View>
+            {daily.streak > 0 && (
+              <Text style={[styles.dailyStreak, { color: '#FF8C50' }]}>
+                🔥 {daily.streak} {t.dayStreak}
+              </Text>
+            )}
+          </View>
+          <View style={styles.dailyRight}>
+            {daily.completed ? (
+              <View style={styles.dailyCompletedBadge}>
+                <Ionicons name="checkmark-circle" size={20} color="#28A878" />
+                <Text style={[styles.dailyCompletedText, { color: '#28A878' }]}>{daily.bestScore}</Text>
+              </View>
+            ) : (
+              <Ionicons name="play-circle" size={32} color="#FF8C50" />
+            )}
+          </View>
+        </Pressable>
+      )}
+
       {/* Saved Games */}
-      <View style={styles.savedSection}>
+      <ScrollView style={styles.savedSection} showsVerticalScrollIndicator={false}>
+      <View>
         <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>{t.savedGames}</Text>
 
         {!hasSavedGames && (
@@ -119,7 +162,7 @@ export function HomeScreen({
             >
               <View style={styles.slotInfo}>
                 <View style={styles.slotRow}>
-                  <Text style={[styles.slotScore, { color: theme.textPrimary }]}>{slot.score}</Text>
+                  <Text style={[styles.slotScore, { color: theme.textPrimary, fontSize: Math.min(22, width * 0.058) }]}>{slot.score}</Text>
                   <View style={[styles.slotTileBadge, { backgroundColor: theme.background }]}>
                     <Text style={[styles.slotTileText, { color: theme.textSecondary }]}>{slot.highestTile}</Text>
                   </View>
@@ -143,6 +186,7 @@ export function HomeScreen({
           );
         })}
       </View>
+      </ScrollView>
 
       {/* Bottom actions */}
       <View style={styles.bottomRow}>
@@ -165,12 +209,10 @@ export function HomeScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 20,
   },
   header: {
     alignItems: 'center',
     gap: 4,
-    marginBottom: 28,
   },
   logo: {
     fontFamily: 'Inter_700Bold',
@@ -209,6 +251,44 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_700Bold',
     fontSize: 17,
     letterSpacing: 0.2,
+  },
+  dailyCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 16,
+  },
+  dailyLeft: {
+    gap: 4,
+    flex: 1,
+  },
+  dailyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  dailyTitle: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 15,
+  },
+  dailyStreak: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    marginLeft: 26,
+  },
+  dailyRight: {
+    alignItems: 'center',
+  },
+  dailyCompletedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  dailyCompletedText: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 16,
   },
   savedSection: {
     flex: 1,

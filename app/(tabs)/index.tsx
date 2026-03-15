@@ -6,6 +6,7 @@ import {
   Pressable,
   Platform,
   Alert,
+  useWindowDimensions,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import Animated, {
@@ -33,6 +34,7 @@ import { useBestScore } from '@/hooks/useBestScore';
 import { useSettings } from '@/hooks/useSettings';
 import { useGameStats } from '@/hooks/useGameStats';
 import { useSavedGames } from '@/hooks/useSavedGames';
+import { useDailyChallenge } from '@/hooks/useDailyChallenge';
 import { useReviewPrompt } from '@/hooks/useReviewPrompt';
 import { getTheme } from '@/constants/colors';
 import { useT } from '@/constants/i18n';
@@ -51,6 +53,7 @@ export default function AppRoot() {
   const theme = getTheme(settings.theme);
   const isDark = settings.theme === 'dark';
   const t = useT();
+  const { width: screenWidth } = useWindowDimensions();
 
   // Show onboarding if not completed
   const [showOnboarding, setShowOnboarding] = useState(!settings.hasCompletedOnboarding);
@@ -61,7 +64,9 @@ export default function AppRoot() {
   const { bestScore, resetBestScore } = useBestScore(score);
   const { stats, recordGame, resetStats } = useGameStats();
   const { slots, saveGame, deleteGame, findEmptySlot } = useSavedGames();
+  const { challenge: dailyChallenge, completeDaily, getDailyTiles } = useDailyChallenge();
   const { recordSession, onReachTile55, onNewPersonalBest } = useReviewPrompt();
+  const [isDailyMode, setIsDailyMode] = useState(false);
 
   const [showTutorial, setShowTutorial] = useState(false);
   const prevHighestTile = useRef(0);
@@ -106,8 +111,23 @@ export default function AppRoot() {
     setShowOnboarding(false);
   };
 
+  // Start daily challenge
+  const startDaily = () => {
+    setIsDailyMode(true);
+    setActiveSlot(-1);
+    const dailyTiles = getDailyTiles();
+    loadGame(dailyTiles, 0, 0);
+    gameStartTime.current = Date.now();
+    setGameDuration(0);
+    setFloatingScores([]);
+    boardOpacity.value = 0;
+    boardOpacity.value = withDelay(100, withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }));
+    setScreen('game');
+  };
+
   // Navigate to game
   const startNewGame = () => {
+    setIsDailyMode(false);
     const slot = findEmptySlot();
     setActiveSlot(slot);
     restart();
@@ -174,8 +194,8 @@ export default function AppRoot() {
     if (gameOver && !prevGameOver.current) {
       const highestTile = tiles.reduce((max, ti) => Math.max(max, ti.value), 0);
       recordGame(score, highestTile);
-      // Delete from saved slot since game is over
-      if (activeSlot >= 0) deleteGame(activeSlot);
+      if (isDailyMode) completeDaily(score);
+      else if (activeSlot >= 0) deleteGame(activeSlot);
     }
     prevGameOver.current = gameOver;
   }, [gameOver, score, tiles, recordGame, activeSlot, deleteGame]);
@@ -321,6 +341,8 @@ export default function AppRoot() {
           onNewGame={startNewGame}
           onContinueGame={continueGame}
           onDeleteGame={deleteGame}
+          daily={dailyChallenge}
+          onPlayDaily={startDaily}
           onOpenSettings={handleSettings}
         />
         <SettingsModal
@@ -353,11 +375,11 @@ export default function AppRoot() {
             <Ionicons name="chevron-back" size={20} color={theme.textSecondary} />
           </Pressable>
 
-          <Text style={[styles.title, { color: theme.textPrimary }]}>fibo</Text>
+          <Text style={[styles.title, { color: theme.textPrimary, fontSize: Math.min(28, screenWidth * 0.072) }]}>fibo</Text>
         </View>
 
         <View style={styles.headerRight}>
-          <Animated.View style={[styles.scoreCard, { backgroundColor: theme.scoreCard }, shadowStyle, scoreAnimStyle]}>
+          <Animated.View style={[styles.scoreCard, { backgroundColor: theme.scoreCard, minWidth: Math.min(60, screenWidth * 0.15) }, shadowStyle, scoreAnimStyle]}>
             <Text style={[styles.scoreLabel, { color: theme.textMuted }]}>{t.scoreLabel}</Text>
             <AnimatedScore value={score} style={[styles.scoreValue, { color: theme.textPrimary }]} />
             {floatingScores.map((f) => (
@@ -365,7 +387,7 @@ export default function AppRoot() {
             ))}
           </Animated.View>
 
-          <View style={[styles.scoreCard, { backgroundColor: theme.scoreCard }, shadowStyle]}>
+          <View style={[styles.scoreCard, { backgroundColor: theme.scoreCard, minWidth: Math.min(60, screenWidth * 0.15) }, shadowStyle]}>
             <Text style={[styles.scoreLabel, { color: theme.textMuted }]}>{t.bestLabel}</Text>
             <Text style={[styles.scoreValue, { color: theme.textPrimary }]}>{bestScore}</Text>
           </View>

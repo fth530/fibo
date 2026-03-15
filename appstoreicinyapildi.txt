@@ -306,14 +306,17 @@ tr-TR: mantık,beyin,sayı,oyun,strateji,rahatlatıcı,
 [B3] RAKİP GAP MATRİSİ — ALTIN FIRSATLAR
 --------------------------------------------------------------
 
-Fibonacci niş'inde HİÇBİR kaliteli rakip yok:
+Fibonacci niş'inde HİÇBİR kaliteli rakip yok.
+(Kaynak: App Store arama "fibonacci game", 15 Mart 2026)
 
-Rakip                  Rating   Durumu       Kritik Zayıflıkları
-Fibonacci Flow (2025)  0        Yeni         "merge" keyword eksik, sıfır rating
-Fibonacci: Number Game Az       Aktif        Eski UI, merge/swipe yok
-Fibonacci Numbers      Az       Aktif        Sadece "fibonacci numbers" optimize
-2048+Fibonacci (2016)  Az       TERK EDİLMİŞ 2016'dan beri güncelleme yok
-Fibonacci Hex Merge    Az       Aktif        Hex grid, farklı mekanik
+Rakip                           Rating  Ort.  Durum          Zayıflıklar
+Fibonacci Game (2014)           5       4.5   Eski           Amatör UI, 10 yıllık
+Fibonacci: The Number Game      3       5.0   Aktif          Basit, modern değil
+Phi Zen Fibonacci Merge Puzzle  ?       ?     Yeni           Henüz rating yok
+2048 Master Fibonacci Game      0       0     Terk (2016)    Hiç rating yok
+2048 + Fibonacci                10      1.9   Terk (2016)    Kötü rating
+Fibonacci Ball                  ?       ?     Aktif          69,99₺ ücretli!
+Fibonacci Numbers               ?       ?     Aktif          8x5 grid, farklı
 
 Rakip Metadata Gap Matrisi (EKSİK = Fırsat):
 Keyword        FibFlow  Fib:Num  FibNums  2048+Fib  FIBO
@@ -326,23 +329,52 @@ logic          ✗        ✗        ✗        ✗         ✓
 offline        ✗        ✗        ✗        ✗         ✓
 
 
-[B4] KEYWORD SIRALAMA YOLI HARİTASI
+[B4] KEYWORD SIRALAMA YOLI HARİTASI — GERÇEK VERİLERLE
 --------------------------------------------------------------
+     Kaynak: ASOMobile (15 Mart 2026) + App Store manuel arama
 
-🟢 YEŞİL = Hemen gir, kolay   🟡 SARI = 1-3 ay   🔴 KIRMIZI = 6+ ay
+🟢 YEŞİL = Hemen gir   🟡 SARI = 1-3 ay   🔴 KIRMIZI = 6+ ay
 
-Keyword                Hacim   En Güçlü Rakip       Hedef    Süre
-fibonacci merge        Düşük   YOK                  🟢 #1   Gün 7-14
-fibonacci merge puzzle Düşük   YOK                  🟢 #1   Gün 7-14
-number sequence game   Düşük   YOK                  🟢 #1-3 Hafta 2-3
-fibonacci sequence     Düşük   YOK                  🟢 #1   Gün 7-14
-swipe number puzzle    Düşük   YOK                  🟢 #1-3 Hafta 2-3
-fibonacci game         Orta    Fibonacci Flow (0★)   🟡 #1-5 Ay 1-2
-fibonacci puzzle       Orta    Fibonacci Flow        🟡 #1-5 Ay 1-2
-2048 fibonacci         Orta    2048+Fib (terk)       🟡 #3-8 Ay 1-3
-merge number puzzle    Yüksek  M2 Blocks, 2248       🟡 #10  Ay 2-4
-number puzzle          Ç.Yüksek Number Match          🔴 #20  6+ ay
-2048                   Max     2048 uygulamaları      🔴 #50  1 yıl+
+── GERÇEK ASOMobile VERİLERİ ──
+
+Keyword              Popularity  Difficulty  Apps   Strateji
+fibonacci            5           5 🟢        83     HEMEN #1 — sıfır rekabet!
+fibonacci sequence   5           5 🟢        155    HEMEN #1 — sıfır rekabet!
+fibonacci numbers    5           48 🟡       216    Top 5 kolay
+fibonacci tool       5           13 🟢       215    HEMEN — çok kolay
+numbers game         17          70 🔴       230    Uzun vade (Faz 2)
+the 2048 game        22          55 🟡       210    Kullanma (rakip marka)
+8x8                  28          21 🟡       77     Alakasız
+grid maker           36          56 🟡       223    Alakasız
+number games         42          70 🔴       241    Çok zor — Faz 2+
+grid                 54          60 🟡       209    Alakasız
+2048                 59          61 🟡       197    KULLANMA — devasa rekabet
+
+── GERÇEK RAKİP VERİLERİ (App Store Manuel Arama) ──
+
+"fibonacci game" aramasında çıkan oyunlar:
+Uygulama                         Rating  Ort.  Çıkış    Durum
+Fibonacci Game                   5       4.5   2014     Eski, amatör UI
+Fibonacci: The Number Game       3       5.0   2020     Basit, az kullanıcı
+2048 Master Fibonacci Game       0       0     2016     Terk edilmiş
+Phi Zen Fibonacci Merge Puzzle   ?       ?     Yeni     En ciddi ama yeni
+Fibonacci Ball                   ?       ?     ?        69,99₺ ücretli!
+2048 + Fibonacci                 10      1.9   2016     Terk, kötü rating
+
+SONUÇ: Fibonacci niş'indeki tüm rakiplerin TOPLAM rating'i < 20.
+Fibo 50 rating'de bile bu niş'in tartışmasız #1'i olur.
+
+── KEYWORD SIRALAMA TAHMİNİ ──
+
+Keyword                Hedef Sıra   Süre        Neden
+fibonacci              #1           Gün 7-14    Diff=5, kaliteli rakip yok
+fibonacci sequence     #1           Gün 7-14    Diff=5, boş alan
+fibonacci merge        #1           Gün 7-14    Title'da var, rakipler yok
+fibonacci puzzle       #1-3         Hafta 2-4   Title combo indekslenecek
+fibonacci game         #1-3         Ay 1        En "kalabalık" ama 5 rating max
+fibonacci numbers      #3-5         Ay 1-2      Diff=48, biraz daha zor
+numbers game           #15-30       Ay 3-6      Pop=17, Diff=70, uzun vade
+number games           #30-50       Ay 6+       Pop=42, Diff=70, çok zor
 
 
 [B5] 6-SCREENSHOT MİMARİSİ — 7 Saniyede İkna Et

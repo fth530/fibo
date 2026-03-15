@@ -69,6 +69,7 @@ const strings = {
 
   // Settings
   settingsTitle: { tr: 'ayarlar', en: 'settings', ja: '設定', de: 'Einstellungen', ko: '설정', fr: 'paramètres', pt: 'configurações', es: 'ajustes' },
+  soundEffects: { tr: 'Ses Efektleri', en: 'Sound Effects', ja: 'サウンド', de: 'Soundeffekte', ko: '사운드', fr: 'Effets Sonores', pt: 'Efeitos Sonoros', es: 'Efectos de Sonido' },
   hapticFeedback: { tr: 'Titreşim', en: 'Haptic Feedback', ja: '振動フィードバック', de: 'Haptisches Feedback', ko: '진동 피드백', fr: 'Retour Haptique', pt: 'Feedback Tátil', es: 'Retroalimentación Háptica' },
   darkMode: { tr: 'Karanlık Mod', en: 'Dark Mode', ja: 'ダークモード', de: 'Dunkelmodus', ko: '다크 모드', fr: 'Mode Sombre', pt: 'Modo Escuro', es: 'Modo Oscuro' },
   language: { tr: 'Dil', en: 'Language', ja: '言語', de: 'Sprache', ko: '언어', fr: 'Langue', pt: 'Idioma', es: 'Idioma' },
@@ -87,6 +88,12 @@ const strings = {
   onboardingDesc: { tr: 'Ardışık Fibonacci sayılarını birleştirerek en yüksek sayıya ulaşmaya çalış.', en: 'Merge consecutive Fibonacci numbers to reach the highest number possible.', ja: '連続するフィボナッチ数を合体させて、最高の数を目指そう。', de: 'Verbinde aufeinanderfolgende Fibonacci-Zahlen, um die höchstmögliche Zahl zu erreichen.', ko: '연속된 피보나치 수를 합쳐서 가장 높은 숫자에 도달하세요.', fr: 'Fusionnez les nombres de Fibonacci consécutifs pour atteindre le nombre le plus élevé.', pt: 'Mescle números de Fibonacci consecutivos para alcançar o maior número possível.', es: 'Fusiona números de Fibonacci consecutivos para alcanzar el número más alto posible.' },
   selectLanguage: { tr: 'Dil Seçin', en: 'Select Language', ja: '言語を選択', de: 'Sprache wählen', ko: '언어 선택', fr: 'Choisir la Langue', pt: 'Selecionar Idioma', es: 'Seleccionar Idioma' },
   startPlaying: { tr: 'Oynamaya Başla', en: 'Start Playing', ja: 'ゲーム開始', de: 'Spiel starten', ko: '게임 시작', fr: 'Commencer à Jouer', pt: 'Começar a Jogar', es: 'Empezar a Jugar' },
+
+  // Daily Challenge
+  dailyChallenge: { tr: 'Günlük Meydan Okuma', en: 'Daily Challenge', ja: '今日のチャレンジ', de: 'Tägliche Herausforderung', ko: '오늘의 도전', fr: 'Défi du Jour', pt: 'Desafio Diário', es: 'Reto Diario' },
+  dailyCompleted: { tr: 'Tamamlandı!', en: 'Completed!', ja: '完了！', de: 'Geschafft!', ko: '완료!', fr: 'Terminé !', pt: 'Concluído!', es: '¡Completado!' },
+  dayStreak: { tr: 'gün serisi', en: 'day streak', ja: '日連続', de: 'Tage Serie', ko: '일 연속', fr: 'jours de suite', pt: 'dias seguidos', es: 'días seguidos' },
+  playDaily: { tr: 'Günlük Oyna', en: 'Play Daily', ja: '今日のプレイ', de: 'Heute spielen', ko: '오늘 플레이', fr: 'Jouer Aujourd\'hui', pt: 'Jogar Hoje', es: 'Jugar Hoy' },
 
   // Sharing
   share: { tr: 'Paylaş', en: 'Share', ja: '共有', de: 'Teilen', ko: '공유', fr: 'Partager', pt: 'Compartilhar', es: 'Compartir' },

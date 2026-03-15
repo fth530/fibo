@@ -9,6 +9,8 @@ import {
   Platform,
   Alert,
   Linking,
+  ScrollView,
+  useWindowDimensions,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -39,6 +41,7 @@ const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: SettingsModalProps) {
   const { settings, updateSettings } = useSettings();
   const t = useT();
+  const { width } = useWindowDimensions();
 
   const backdropAlpha = useSharedValue(0);
   const cardY = useSharedValue(600);
@@ -85,10 +88,26 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
           <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
         </Animated.View>
 
-        <Animated.View style={[styles.card, { backgroundColor: theme.modalBg }, cardStyle]}>
+        <Animated.View style={[styles.card, { backgroundColor: theme.modalBg, paddingHorizontal: Math.max(20, width * 0.06) }, cardStyle]}>
           <View style={styles.handle} />
 
+          <ScrollView showsVerticalScrollIndicator={false}>
+          <View style={{ gap: 16 }}>
           <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>{t.settingsTitle}</Text>
+
+          {/* Sound Toggle */}
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Ionicons name={settings.soundEnabled ? 'volume-high-outline' : 'volume-mute-outline'} size={20} color={theme.textSecondary} />
+              <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>{t.soundEffects}</Text>
+            </View>
+            <Switch
+              value={settings.soundEnabled ?? true}
+              onValueChange={(val) => updateSettings({ soundEnabled: val })}
+              trackColor={{ false: theme.emptyCell, true: '#FF8C50' }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
 
           {/* Haptic Toggle */}
           <View style={styles.settingRow}>
@@ -219,6 +238,8 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
           >
             <Text style={[styles.closeBtnText, { color: theme.restartBtnText }]}>{t.done}</Text>
           </Pressable>
+          </View>
+          </ScrollView>
 
           {/* App Version */}
           <Text style={[styles.versionText, { color: theme.textMuted }]}>
@@ -251,7 +272,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingTop: 12,
-    paddingHorizontal: 28,
     paddingBottom: Platform.OS === 'web' ? 40 : 36,
     gap: 16,
     ...Platform.select({
@@ -335,7 +355,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontFamily: 'Inter_700Bold',
-    fontSize: 22,
+    fontSize: 20,
     letterSpacing: -0.5,
   },
   statLabel: {

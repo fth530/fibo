@@ -1,0 +1,137 @@
+Harika bir soru, çünkü Fibo'nun hedef kitlesi sıradan casual oyunculardan oldukça farklı. Matematik özelliği, Fibonacci'nin kültürel ağırlığı ve logic puzzle kategorisi çok spesifik bir demografiyi çekiyor. Araştırmayı bu çerçevede yaptım.
+
+🌍 Fibo İçin Ülke Analizi: Nerede, Neden?
+Genel Tablo
+Q1 2024'te gelir sıralaması şu şekilde: ABD ($12.4 milyar), Çin ($6 milyar), Japonya ($4.1 milyar), Güney Kore ($1.6 milyar), İngiltere ($1.1 milyar). İndirme sıralamasında ise Hindistan (5.93 milyar), ABD (3.06 milyar), Brezilya (2.05 milyar), Endonezya (1.83 milyar) lider. devtodev
+2025 gelir büyüme liderlerine bakıldığında ABD (+7.8% YoY), Japonya (+4% YoY) ve Almanya (+5.1% YoY) öne çıkıyor. Merge, Block Puzzle ve Logic Puzzle alt kategorileri özellikle gelir büyümesi liderliği yapıyor. Substack
+Fibo için önemli olan şu: Logic puzzle oyunları 2026'da indirmelerde %19 YoY artış gördü — bu, beyin egzersizi ve IQ geliştirme formatlarına artan talebi yansıtıyor. Verified Market Reports
+
+📊 Öncelik Sıralaması: Tier 1, 2, 3
+🥇 TİER 1 — Yüksek ARPU + Güçlü Puzzle Kültürü
+
+🇺🇸 Amerika Birleşik Devletleri
+Puzzle oyunları ABD'de indirme sıralamasında liderliğini koruyor, tıpkı Güney Kore ve Japonya gibi. ASOMobile iOS dominant, kullanıcı başına harcama yüksek. Fibonacci dizisi matematik meraklıları arasında evrensel bilinen bir kavram. "Wall Street Journal 2048'i 'math geeks için Candy Crush gibi' tanımladı" — Fibo tam da o kitleye hitap ediyor.
+Dil: İngilizce (en-US)
+Title: Fibo: Fibonacci Merge Puzzle
+Subtitle: Swipe Tiles & Number Sequence
+Keyword Field: logic,brain,2048,number,tiles,sequence,game,match,relax,offline,threes,addictive,math
+Neden bu keywords? "Threes!" köklü bir kült oyun ve ABD'de "games like Threes" aramaları aktif. "Offline" mutlaka var çünkü "play offline" aramaları çok yapılıyor. "2048" ise —rakip adı olmasına rağmen— keyword field'a girilebilir, Apple'ın bunu engelleme mekanizması yok.
+
+🇯🇵 Japonya
+Bu, Fibo için muhtemelen en yüksek potansiyelli pazar. Birkaç neden:
+Japonya geleneksel olarak mobil oyun tutkunlarının kalesidir. Puzzle oyunları son derece popüler. Q1 2024'te Japonya oyun piyasası 2.9 milyar dolara ulaştı. ASOMobile
+Fibonacci dizisi Japonya'da sadece matematik değil — tasarım, sanat ve doğa anlayışıyla iç içe geçmiş bir konsept (Hokusai'nin dalgası, Zen mimarisi oranları). Japonya'da GungHo ve Bandai Namco gibi yerli yayıncılar puzzle ve anime temalı casual oyunlarda mükemmeliyetleriyle tanınıyor. Entegre ödeme sistemleri uygulama içi satın alımı kolaylaştırıyor. Intelmarketresearch
+Japonya'da "脳トレ" (nou-tore = brain training) kültürü çok güçlü — Dr. Kawashima'nın DS oyunundan bu yana beyin egzersizi konsepti kitlesel kabul gördü.
+Dil: Japonca (zorunlu — İngilizce kalan uygulamalar Japonya'da convert etmiyor)
+Title: Fibo: フィボナッチ合体パズル
+("Fibonacci Merge Puzzle" — 合体 = birleşme/merge)
+Subtitle: 数列を繋げてタイルを合体
+("Dizileri birleştir, tile'ları merge et")
+Keyword Field: フィボナッチ,パズル,合体,数字,脳トレ,ロジック,スワイプ,数列,オフライン,頭脳
+⚠️ Japonya'da mutlaka native Japonca konuşanla QA yap. Yanlış kanji kullanımı hem convert'i hem indexlemeyi mahveder.
+
+🇩🇪 Almanya
+2025'te Almanya gelir büyümesinde +5.1% YoY ile dikkat çekiyor. Substack Almanya'da matematik ve mantık kültürü çok güçlü — "Denksport" (düşünce sporu) kavramı kültürün parçası. iOS penetrasyonu ~%60, ARPU yüksek. Fibonacci puzzle nişinde sıfır Almanca rakip mevcut.
+Dil: Almanca (de-DE)
+Title: Fibo: Fibonacci Merge Puzzle
+(Almanca'da "Merge" ve "Puzzle" zaten kullanılıyor, anlaşılıyor)
+Subtitle: Wische Kacheln & Zahlenfolge
+("Swipe tiles & number sequence")
+Keyword Field: Logik,Kopfrechnen,Denksport,Zahlen,Kacheln,Gehirntraining,Reihe,Mathe,offline,klassisch
+"Kopfrechnen" (zihinsel aritmetik) Almanya'da çok aranan bir terim. "Denksport" ise logic puzzle kategorisinin kültürel karşılığı.
+
+🇰🇷 Güney Kore
+Puzzle oyunları Güney Kore'de 2024'te en çok indirilen kategori olmayı sürdürdü. Ocak-Ekim 2024 arasında puzzle oyun indirmeleri %7 artarak 88 milyona ulaştı — tüm mobil oyun indirmelerinin %23'ünü oluşturuyor. Sensor Tower
+Matematik eğitimine verilen yoğun önem, özel ders kültürü, rekabetçi sınav sistemi — bunların hepsi "beyin egzersizi" içeriklerine talebi artırıyor. Fibonacci dizisi lise matematiğinde işleniyor.
+Dil: Korece (ko-KR)
+Title: Fibo: 피보나치 합치기 퍼즐
+("Fibonacci Merge Puzzle")
+Subtitle: 타일을 밀어서 수열을 합쳐라
+("Swipe tiles and merge the sequence")
+Keyword Field: 피보나치,퍼즐,두뇌,숫자,합치기,로직,수학,오프라인,뇌운동,수열
+Samsung Galaxy Store'u da ihmal etme — Kore'de Galaxy Store penetrasyonu App Store ile yarışıyor.
+
+🥈 TİER 2 — Yüksek Hacim veya Kültürel Uyum
+
+🇬🇧 İngiltere
+İngiltere Q1 2024'te +28% YoY gelir büyümesiyle dikkat çekti. devtodev Kritik fark: İngilizler "maths" yazar, "math" değil. Ayrı locale zorunlu.
+Dil: İngilizce (en-GB)
+Title: Fibo: Fibonacci Merge Puzzle
+Subtitle: Swipe Tiles & Number Sequence
+Keyword Field: logic,brain,2048,number,tiles,sequence,maths,relax,offline,threes,addictive,revision
+"Revision" ekle — İngiliz öğrenciler sınav hazırlığı için "maths revision" sık arıyor.
+
+🇫🇷 Fransa
+"Calcul mental" (zihinsel hesap) Fransa'da çok kullanılan bir terim. Fibonacci nişinde Fransızca rakip yok.
+Dil: Fransızca (fr-FR)
+Title: Fibo: Fibonacci Puzzle Fusion
+Subtitle: Glisse les tuiles & Séquence
+Keyword Field: logique,cerveau,chiffres,séquence,calcul,jeu,hors ligne,fibonacci,glisser,mathématiques
+
+🇧🇷 Brezilya
+Latin Amerika puzzle oyun kullanıcılarında %14 YoY büyüme var. Brezilya ve Meksika bölgesel benimsemede lider. Ücretsiz oynama ve reklam destekli modeller monetizasyonu yönlendiriyor. Verified Market Reports
+Brezilya yüksek hacim = indirme momentumu anlamına geliyor; ARPU düşük olsa da chart positioning için değerli.
+Dil: Portekizce/Brezilya (pt-BR)
+Title: Fibo: Puzzle de Fibonacci
+Subtitle: Deslize Peças & Sequência
+Keyword Field: lógica,cérebro,números,sequência,mesclar,jogo,offline,matemática,raciocínio
+
+🥉 TİER 3 — Gelişen Fırsatlar
+
+🇪🇸 İspanya / LATAM
+500M+ İspanyolca konuşan. Fibonacci puzzle nişinde sıfır İspanyolca rakip.
+Dil: İspanyolca (es-ES + es-MX için ayrı)
+Title: Fibo: Puzzle de Fibonacci
+Subtitle: Desliza Fichas & Secuencia
+Keyword Field: lógica,cerebro,números,secuencia,combinar,juego,sin internet,matemáticas
+
+🇮🇳 Hindistan
+Hindistan, 2025'te indirme sayısında birinci konumunu koruyor (+1.9% YoY). Substack ARPU düşük ama indirme hacmi devasa — algorithm'a "aktif uygulama" sinyali için değerli. Matematik eğitimine verilen önem yüksek.
+Dil: İngilizce (en-IN) — App Store'da en-IN locale'i var
+Title: Fibo: Fibonacci Merge Puzzle
+Subtitle: Math Sequence & Logic Game
+Keyword Field: logic,math,brain,tiles,sequence,2048,offline,number,puzzle,game,merge,IQ
+"Math" İngiltere'den farklı olarak Hindistan'da kullanılıyor. "IQ" hint pazarında daha fazla aranan bir kelime.
+
+🇸🇦 Suudi Arabistan / BAE
+MENA bölgesinde özellikle Türkiye ve Suudi Arabistan'da yerelleştirilmiş Arapça içerik büyüyor. Mobile-first kullanıcılar kısa oturum süreli oyunları tercih ediyor. Intelmarketresearch iOS ARPU yüksek.
+Dil: Arapça (ar-SA) — RTL layout zorunlu
+Title: Fibo: ألغاز فيبوناتشي
+Subtitle: دمج الأرقام التسلسلية
+Keyword Field: (Arapça kelimeler: رياضيات، أرقام، لغز، منطق، دماغ، سلسلة، تحريك)
+
+👥 Hedef Kitle Demografisi
+Küresel olarak kadın mobil oyuncular puzzle oyunlarına günde ortalama 19.1 dakika, erkekler ise 17.6 dakika harcıyor — puzzle, kadın oyuncularda daha dominant. Statista
+18-35 yaş segmenti casual oyun pazarının %46'sını oluşturuyor. Mordor Intelligence Fibo için spesifik olarak iki profil öne çıkıyor: matematik/mühendislik arka planı olan 22-38 yaş arası profesyoneller, ve 2048/Threes! gibi oyunları bilen daha seçici bir kitle.
+
+🗺️ Dil Seçim Özeti (Öncelik Sırası)
+ÖncelikDilLocaleGerekçe1🇺🇸 English (US)en-USBüyük pazar, en iyi bilinen iOS market2🇯🇵 Japaneseja-JPEn yüksek potansiyel, 脳トレ kültürü3🇩🇪 Germande-DEARPU yüksek, +5.1% büyüme4🇬🇧 English (UK)en-GB"maths" farkı, yüksek kaliteli kullanıcı5🇰🇷 Koreanko-KRPuzzle #1 kategori, matematik kültürü6🇫🇷 Frenchfr-FRiOS güçlü, Fibonacci nişi boş7🇧🇷 Portuguese (BR)pt-BRHacim için8🇪🇸 Spanishes-ES + es-MX500M+ konuşucu9🇮🇳 English (IN)en-INHacim + chart sinyali10🇸🇦 Arabicar-SAARPU, ama RTL mühendislik gerekli
+
+🎯 Fibo'ya Özel Kritik Notlar
+Japonya'ya önce gir. Puzzle oyunları Japonya'da indirme sıralamasına hakim olmaya devam ediyor ve pazar 2.9 milyar dolarda seyrediyor. ASOMobile Fibonacci hem matematiksel hem estetik olarak Japon kültürüyle derin bir bağı olan bir kavram — bu başka bir oyun için söylenemez.
+Almanya gözardı edilemez. Yüksek ARPU + logic/puzzle kültürü + büyüyen pazar. "Denksport" kavramı tam olarak Fibo'nun sunduğu şey. Fibonacci nişinde Almanca rakip sıfır.
+Brezilya'yı düşük ARPU ile görmezden gelme. Yüksek indirme hacmi = algoritmanın seni "aktif, popüler" görüp organic distribution yapması demek. Brezilya lansmanı diğer pazarlardaki organik görünürlüğü artırır.
+
+
+
+
+⚠️ Neye Dikkatli Bakmalısın?
+Keyword hacim tahminleri — TAHMİN.
+"fibonacci merge" için "düşük (15-30)" yazdım. Bu AppTweak veya ASOMobile'e erişimim olmadan yapılmış bir tahmin. Gerçek rakam 5 de olabilir, 80 de. Bu rakamlara para yatırmadan önce ASOMobile'in ücretsiz tierını veya AppTweak'in trial'ını kullanarak bizzat kontrol et.
+Lokalize keyword'ler — native doğrulama gerekli.
+Japonca フィボナッチ合体パズル, Korece 피보나치 합치기 퍼즐 gibi önerilerin doğruluğunu sana söyleyen birinin ana dili o dil değil. Japonya için özellikle: yanlış kanji = sıfır indexleme. Japonca ve Korece metadata'yı native speaker'a mutlaka göster.
+Almanca "Denksport" kelimesi — bu kültürel bir terim, App Store'da kaç kişi bu kelimeyi aradığını bilmiyorum. Kültürel bağlamı doğru analiz ettim ama arama hacmi düşük olabilir.
+"Fibonacci" nişinde indirme potansiyeli — belirsiz.
+Bu nişin ne kadar hacim taşıdığını kimse kesin bilmiyor çünkü bu nişte hiç kaliteli uygulama olmadı. Fibo bu nişi yaratan ilk uygulama olabilir — bu hem fırsat hem risk.
+
+🔬 Gerçekten Emin Olmak İçin Ne Yapmalısın?
+Şu 3 şeyi yap, maliyet düşük:
+1. ASOMobile ücretsiz tier (asomobile.net)
+"fibonacci merge", "fibonacci puzzle", "fibonacci game" için gerçek arama hacmini kontrol et. 30 dakika.
+2. App Store'da manuel kontrol
+Telefonundan şu aramaları yap: "fibonacci game", "fibonacci puzzle", "fibonacci merge". Kaç uygulama çıkıyor, nasıl görünüyorlar, kaç rating'leri var. Gözün bu analizi teyit edecek.
+3. Japonca için bir native speaker
+Fiverr'da veya Discord'da bir Japonca konuşana metadata'yı göster — $20-30 değer.
+
+
+
