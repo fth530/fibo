@@ -8,6 +8,7 @@ import {
   Switch,
   Platform,
   Alert,
+  Linking,
 } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -164,6 +165,31 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
               value={stats.totalGames > 0 ? String(Math.round(stats.totalScore / stats.totalGames)) : '0'}
               theme={theme}
             />
+          </View>
+
+          <View style={[styles.divider, { backgroundColor: theme.divider }]} />
+
+          {/* Links */}
+          <View style={styles.linksRow}>
+            <Pressable
+              onPress={() => Linking.openURL('https://fth530.github.io/fibo/privacy-policy.html')}
+              style={({ pressed }) => [styles.linkBtn, { opacity: pressed ? 0.6 : 1 }]}
+            >
+              <Ionicons name="shield-checkmark-outline" size={15} color={theme.textMuted} />
+              <Text style={[styles.linkBtnText, { color: theme.textMuted }]}>
+                {settings.language === 'tr' ? 'Gizlilik Politikası' : 'Privacy Policy'}
+              </Text>
+            </Pressable>
+            <Text style={[styles.linkDot, { color: theme.textMuted }]}>·</Text>
+            <Pressable
+              onPress={() => Linking.openURL('https://github.com/fth530/fibo')}
+              style={({ pressed }) => [styles.linkBtn, { opacity: pressed ? 0.6 : 1 }]}
+            >
+              <Ionicons name="help-buoy-outline" size={15} color={theme.textMuted} />
+              <Text style={[styles.linkBtnText, { color: theme.textMuted }]}>
+                {settings.language === 'tr' ? 'Destek' : 'Support'}
+              </Text>
+            </Pressable>
           </View>
 
           <View style={[styles.divider, { backgroundColor: theme.divider }]} />
@@ -332,6 +358,26 @@ const styles = StyleSheet.create({
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
     color: '#E85050',
+  },
+  linksRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  linkBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 4,
+  },
+  linkBtnText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12,
+    letterSpacing: 0.2,
+  },
+  linkDot: {
+    fontSize: 14,
   },
   closeBtn: {
     borderRadius: 16,

@@ -33,6 +33,7 @@ import { useBestScore } from '@/hooks/useBestScore';
 import { useSettings } from '@/hooks/useSettings';
 import { useGameStats } from '@/hooks/useGameStats';
 import { useSavedGames } from '@/hooks/useSavedGames';
+import { useReviewPrompt } from '@/hooks/useReviewPrompt';
 import { getTheme } from '@/constants/colors';
 import { useT } from '@/constants/i18n';
 import type { Direction } from '@/hooks/useFibonacciGame';
@@ -60,8 +61,10 @@ export default function AppRoot() {
   const { bestScore, resetBestScore } = useBestScore(score);
   const { stats, recordGame, resetStats } = useGameStats();
   const { slots, saveGame, deleteGame, findEmptySlot } = useSavedGames();
+  const { recordSession, onReachTile55, onNewPersonalBest } = useReviewPrompt();
 
   const [showTutorial, setShowTutorial] = useState(false);
+  const prevHighestTile = useRef(0);
   const [showSettings, setShowSettings] = useState(false);
   const [floatingScores, setFloatingScores] = useState<FloatingScoreItem[]>([]);
   const prevGameOver = useRef(false);
@@ -78,6 +81,24 @@ export default function AppRoot() {
 
   const gameStartTime = useRef(Date.now());
   const [gameDuration, setGameDuration] = useState(0);
+
+  // Record session for review prompt
+  useEffect(() => {
+    recordSession();
+  }, [recordSession]);
+
+  // Check for milestone tiles for review prompt
+  useEffect(() => {
+    if (screen !== 'game' || tiles.length === 0) return;
+    const currentHighest = tiles.reduce((max, ti) => Math.max(max, ti.value), 0);
+    if (currentHighest >= 55 && prevHighestTile.current < 55) {
+      onReachTile55();
+    }
+    if (currentHighest > prevHighestTile.current && prevHighestTile.current > 0) {
+      onNewPersonalBest();
+    }
+    prevHighestTile.current = currentHighest;
+  }, [tiles, screen, onReachTile55, onNewPersonalBest]);
 
   // Onboarding completion
   const handleOnboardingComplete = () => {
