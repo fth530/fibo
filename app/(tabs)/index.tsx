@@ -36,6 +36,7 @@ import { useGameStats } from '@/hooks/useGameStats';
 import { useSavedGames } from '@/hooks/useSavedGames';
 import { useDailyChallenge } from '@/hooks/useDailyChallenge';
 import { useReviewPrompt } from '@/hooks/useReviewPrompt';
+import { useGameAudio } from '@/hooks/useGameAudio';
 import { getTheme } from '@/constants/colors';
 import { useT } from '@/constants/i18n';
 import type { Direction } from '@/hooks/useFibonacciGame';
@@ -66,6 +67,7 @@ export default function AppRoot() {
   const { slots, saveGame, deleteGame, findEmptySlot } = useSavedGames();
   const { challenge: dailyChallenge, completeDaily, getDailyTiles } = useDailyChallenge();
   const { recordSession, onReachTile55, onNewPersonalBest } = useReviewPrompt();
+  const { playMerge, playSwipe, playGameOver, playNewRecord } = useGameAudio();
   const [isDailyMode, setIsDailyMode] = useState(false);
 
   const [showTutorial, setShowTutorial] = useState(false);
@@ -193,9 +195,13 @@ export default function AppRoot() {
   useEffect(() => {
     if (gameOver && !prevGameOver.current) {
       const highestTile = tiles.reduce((max, ti) => Math.max(max, ti.value), 0);
+      const isNewBest = score > 0 && score >= bestScore;
       recordGame(score, highestTile);
       if (isDailyMode) completeDaily(score);
       else if (activeSlot >= 0) deleteGame(activeSlot);
+      // Play sound
+      if (isNewBest) playNewRecord();
+      else playGameOver();
     }
     prevGameOver.current = gameOver;
   }, [gameOver, score, tiles, recordGame, activeSlot, deleteGame]);
@@ -246,12 +252,14 @@ export default function AppRoot() {
       );
     } else if (result.merged) {
       haptic(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy));
+      playMerge();
       if (result.scoreGained > 0) {
         const id = ++floatingIdRef.current;
         setFloatingScores((prev) => [...prev, { id, value: result.scoreGained }]);
       }
     } else {
       haptic(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light));
+      playSwipe();
     }
   }, [swipe, settings.hapticEnabled, boardShake]);
 
