@@ -19,6 +19,7 @@ interface GameOverOverlayProps {
   moveCount: number;
   gameDuration: number;
   onPlayAgain: () => void;
+  onBackToMenu?: () => void;
   theme: ThemeColors;
 }
 
@@ -35,6 +36,7 @@ export function GameOverOverlay({
   moveCount,
   gameDuration,
   onPlayAgain,
+  onBackToMenu,
   theme,
 }: GameOverOverlayProps) {
   const isNewBest = score > 0 && score >= bestScore;
@@ -175,6 +177,18 @@ export function GameOverOverlay({
             <Ionicons name="share-outline" size={17} color={theme.textSecondary} />
             <Text style={[styles.shareBtnText, { color: theme.textSecondary }]}>Paylaş</Text>
           </Pressable>
+
+          {onBackToMenu && (
+            <Pressable
+              onPress={onBackToMenu}
+              style={({ pressed }) => [
+                styles.menuBtn,
+                { opacity: pressed ? 0.6 : 1 },
+              ]}
+            >
+              <Text style={[styles.menuBtnText, { color: theme.textMuted }]}>Ana Menü</Text>
+            </Pressable>
+          )}
         </Animated.View>
       </Animated.View>
 
@@ -295,6 +309,15 @@ const styles = StyleSheet.create({
   shareBtnText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 15,
+    letterSpacing: 0.2,
+  },
+  menuBtn: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  menuBtnText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
     letterSpacing: 0.2,
   },
 });

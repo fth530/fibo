@@ -18,6 +18,7 @@ import Animated, {
 import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import { useSettings } from '@/hooks/useSettings';
+import { useT } from '@/constants/i18n';
 import type { ThemeColors } from '@/constants/colors';
 import type { GameStats } from '@/hooks/useGameStats';
 
@@ -33,6 +34,7 @@ const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
 
 export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: SettingsModalProps) {
   const { settings, updateSettings } = useSettings();
+  const t = useT();
 
   const backdropAlpha = useSharedValue(0);
   const cardY = useSharedValue(600);
@@ -57,22 +59,12 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
 
   const handleResetData = () => {
     if (Platform.OS === 'web') {
-      if (confirm('Tüm istatistikler ve en iyi skor sıfırlanacak. Emin misin?')) {
-        onResetStats?.();
-      }
+      if (confirm(t.resetConfirmMsg)) onResetStats?.();
     } else {
-      Alert.alert(
-        'Verileri Sıfırla',
-        'Tüm istatistikler ve en iyi skor sıfırlanacak. Bu işlem geri alınamaz.',
-        [
-          { text: 'İptal', style: 'cancel' },
-          {
-            text: 'Sıfırla',
-            style: 'destructive',
-            onPress: () => onResetStats?.(),
-          },
-        ]
-      );
+      Alert.alert(t.resetConfirmTitle, t.resetConfirmMsg, [
+        { text: t.cancel, style: 'cancel' },
+        { text: t.reset, style: 'destructive', onPress: () => onResetStats?.() },
+      ]);
     }
   };
 
@@ -92,13 +84,13 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
         <Animated.View style={[styles.card, { backgroundColor: theme.modalBg }, cardStyle]}>
           <View style={styles.handle} />
 
-          <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>ayarlar</Text>
+          <Text style={[styles.modalTitle, { color: theme.textPrimary }]}>{t.settingsTitle}</Text>
 
           {/* Haptic Toggle */}
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
               <Ionicons name="phone-portrait-outline" size={20} color={theme.textSecondary} />
-              <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>Titreşim</Text>
+              <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>{t.hapticFeedback}</Text>
             </View>
             <Switch
               value={settings.hapticEnabled}
@@ -116,7 +108,7 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
                 size={20}
                 color={theme.textSecondary}
               />
-              <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>Karanlık Mod</Text>
+              <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>{t.darkMode}</Text>
             </View>
             <Switch
               value={settings.theme === 'dark'}
@@ -126,16 +118,32 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
             />
           </View>
 
+          {/* Language Toggle */}
+          <View style={styles.settingRow}>
+            <View style={styles.settingInfo}>
+              <Ionicons name="language-outline" size={20} color={theme.textSecondary} />
+              <Text style={[styles.settingLabel, { color: theme.textPrimary }]}>{t.language}</Text>
+            </View>
+            <Pressable
+              onPress={() => updateSettings({ language: settings.language === 'tr' ? 'en' : 'tr' })}
+              style={[styles.langToggle, { backgroundColor: theme.background }]}
+            >
+              <Text style={[styles.langToggleText, { color: theme.textPrimary }]}>
+                {settings.language === 'tr' ? 'TR' : 'EN'}
+              </Text>
+            </Pressable>
+          </View>
+
           <View style={[styles.divider, { backgroundColor: theme.divider }]} />
 
           {/* Stats Section */}
-          <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>İSTATİSTİKLER</Text>
+          <Text style={[styles.sectionTitle, { color: theme.textMuted }]}>{t.statistics}</Text>
 
           <View style={styles.statsGrid}>
-            <StatCard label="Oynanan" value={String(stats.totalGames)} theme={theme} />
-            <StatCard label="En Yüksek Taş" value={String(stats.highestTile)} theme={theme} />
+            <StatCard label={t.gamesPlayed} value={String(stats.totalGames)} theme={theme} />
+            <StatCard label={t.highestTileStat} value={String(stats.highestTile)} theme={theme} />
             <StatCard
-              label="Ort. Skor"
+              label={t.avgScore}
               value={stats.totalGames > 0 ? String(Math.round(stats.totalScore / stats.totalGames)) : '0'}
               theme={theme}
             />
@@ -155,7 +163,7 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
               accessibilityRole="button"
             >
               <Ionicons name="trash-outline" size={16} color="#E85050" />
-              <Text style={styles.resetBtnText}>Verileri Sıfırla</Text>
+              <Text style={styles.resetBtnText}>{t.resetData}</Text>
             </Pressable>
           )}
 
@@ -166,7 +174,7 @@ export function SettingsModal({ visible, onClose, theme, stats, onResetStats }: 
               { backgroundColor: theme.restartBtn, opacity: pressed ? 0.82 : 1, transform: [{ scale: pressed ? 0.97 : 1 }] },
             ]}
           >
-            <Text style={[styles.closeBtnText, { color: theme.restartBtnText }]}>Tamam</Text>
+            <Text style={[styles.closeBtnText, { color: theme.restartBtnText }]}>{t.done}</Text>
           </Pressable>
 
           {/* App Version */}
@@ -241,6 +249,16 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontFamily: 'Inter_500Medium',
     fontSize: 15,
+  },
+  langToggle: {
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 10,
+  },
+  langToggleText: {
+    fontFamily: 'Inter_700Bold',
+    fontSize: 13,
+    letterSpacing: 0.5,
   },
   divider: {
     height: 1,

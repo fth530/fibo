@@ -45,16 +45,15 @@ export function GameTile({ tile, cellSize, gap, padding }: GameTileProps) {
 
   useEffect(() => {
     if (tile.isNew) {
-      scale.value = withSpring(1, { damping: 12, stiffness: 300 });
+      scale.value = withSpring(1, { damping: 28, stiffness: 280 });
     }
   }, [tile.isNew, scale]);
 
   useEffect(() => {
     if (tile.isMerged) {
       scale.value = withSequence(
-        withTiming(0, { duration: 0 }),
-        withTiming(1.28, { duration: 100 }),
-        withSpring(1, { damping: 10, stiffness: 360 })
+        withTiming(1.18, { duration: 100 }),
+        withSpring(1, { damping: 18, stiffness: 300 })
       );
     }
   }, [tile.isMerged, scale]);

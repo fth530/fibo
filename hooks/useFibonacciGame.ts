@@ -208,7 +208,8 @@ export interface GameState {
 type GameAction =
   | { type: 'APPLY_SWIPE'; newTiles: TileData[]; scoreGained: number }
   | { type: 'RESTART' }
-  | { type: 'UNDO' };
+  | { type: 'UNDO' }
+  | { type: 'LOAD'; tiles: TileData[]; score: number; moveCount: number };
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
@@ -237,6 +238,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         previousState: null,
         canUndo: false,
         moveCount: state.moveCount - 1,
+      };
+    }
+
+    case 'LOAD': {
+      return {
+        tiles: action.tiles,
+        score: action.score,
+        gameOver: false,
+        previousState: null,
+        canUndo: false,
+        moveCount: action.moveCount,
       };
     }
 
@@ -277,6 +289,10 @@ export function useFibonacciGame() {
     dispatch({ type: 'UNDO' });
   }, []);
 
+  const loadGame = useCallback((tiles: TileData[], score: number, moveCount: number) => {
+    dispatch({ type: 'LOAD', tiles, score, moveCount });
+  }, []);
+
   return {
     tiles: state.tiles,
     score: state.score,
@@ -286,5 +302,6 @@ export function useFibonacciGame() {
     swipe,
     restart,
     undo,
+    loadGame,
   };
 }

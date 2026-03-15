@@ -26,26 +26,40 @@ import { GameOverOverlay } from '@/components/GameOverOverlay';
 import { SettingsModal } from '@/components/SettingsModal';
 import { FloatingScore } from '@/components/FloatingScore';
 import { AnimatedScore } from '@/components/AnimatedScore';
+import { OnboardingModal } from '@/components/OnboardingModal';
+import { HomeScreen } from '@/components/HomeScreen';
 import { useFibonacciGame } from '@/hooks/useFibonacciGame';
 import { useBestScore } from '@/hooks/useBestScore';
 import { useSettings } from '@/hooks/useSettings';
 import { useGameStats } from '@/hooks/useGameStats';
+import { useSavedGames } from '@/hooks/useSavedGames';
 import { getTheme } from '@/constants/colors';
+import { useT } from '@/constants/i18n';
 import type { Direction } from '@/hooks/useFibonacciGame';
+import type { Language } from '@/hooks/useSettings';
+
+type Screen = 'home' | 'game';
 
 interface FloatingScoreItem {
   id: number;
   value: number;
 }
 
-export default function GameScreen() {
-  const insets = useSafeAreaInsets();
-  const { tiles, score, gameOver, canUndo, moveCount, swipe, restart, undo } = useFibonacciGame();
-  const { bestScore, resetBestScore } = useBestScore(score);
+export default function AppRoot() {
   const { settings, updateSettings } = useSettings();
-  const { stats, recordGame, resetStats } = useGameStats();
-
   const theme = getTheme(settings.theme);
+  const isDark = settings.theme === 'dark';
+  const t = useT();
+
+  // Show onboarding if not completed
+  const [showOnboarding, setShowOnboarding] = useState(!settings.hasCompletedOnboarding);
+  const [screen, setScreen] = useState<Screen>('home');
+  const [activeSlot, setActiveSlot] = useState<number>(-1);
+
+  const { tiles, score, gameOver, canUndo, moveCount, swipe, restart, undo, loadGame } = useFibonacciGame();
+  const { bestScore, resetBestScore } = useBestScore(score);
+  const { stats, recordGame, resetStats } = useGameStats();
+  const { slots, saveGame, deleteGame, findEmptySlot } = useSavedGames();
 
   const [showTutorial, setShowTutorial] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -53,6 +67,7 @@ export default function GameScreen() {
   const prevGameOver = useRef(false);
   const floatingIdRef = useRef(0);
 
+  const insets = useSafeAreaInsets();
   const topInset = Platform.OS === 'web' ? 67 : insets.top;
   const bottomInset = Platform.OS === 'web' ? 34 : insets.bottom;
 
@@ -61,50 +76,100 @@ export default function GameScreen() {
   const scoreScale = useSharedValue(1);
   const boardOpacity = useSharedValue(1);
 
-  // Game timer
   const gameStartTime = useRef(Date.now());
   const [gameDuration, setGameDuration] = useState(0);
 
-  // Track game over for duration
-  useEffect(() => {
-    if (gameOver) {
-      setGameDuration(Math.floor((Date.now() - gameStartTime.current) / 1000));
+  // Onboarding completion
+  const handleOnboardingComplete = () => {
+    updateSettings({ hasCompletedOnboarding: true, hasSeenTutorial: true });
+    setShowOnboarding(false);
+  };
+
+  // Navigate to game
+  const startNewGame = () => {
+    const slot = findEmptySlot();
+    setActiveSlot(slot);
+    restart();
+    gameStartTime.current = Date.now();
+    setGameDuration(0);
+    setFloatingScores([]);
+    boardOpacity.value = 0;
+    boardOpacity.value = withDelay(100, withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }));
+    setScreen('game');
+  };
+
+  const continueGame = (slotIndex: number) => {
+    const saved = slots[slotIndex];
+    if (!saved) return;
+    setActiveSlot(slotIndex);
+    loadGame(saved.tiles, saved.score, saved.moveCount);
+    gameStartTime.current = Date.now();
+    setGameDuration(0);
+    setFloatingScores([]);
+    setScreen('game');
+  };
+
+  const handleSaveAndExit = () => {
+    if (score === 0 && moveCount === 0) {
+      setScreen('home');
+      return;
     }
+    const highestTile = tiles.reduce((max, ti) => Math.max(max, ti.value), 0);
+    const slot = activeSlot >= 0 ? activeSlot : findEmptySlot();
+    saveGame(slot, {
+      tiles,
+      score,
+      moveCount,
+      savedAt: Date.now(),
+      highestTile,
+    });
+    setScreen('home');
+  };
+
+  const handleBackToMenu = () => {
+    if (score > 0 && !gameOver) {
+      if (Platform.OS === 'web') {
+        const action = confirm(t.exitConfirmMsg + '\n\n' + t.save + '?');
+        if (action) handleSaveAndExit();
+        else setScreen('home');
+      } else {
+        Alert.alert(t.exitConfirmTitle, t.exitConfirmMsg, [
+          { text: t.cancel, style: 'cancel' },
+          { text: t.dontSave, style: 'destructive', onPress: () => setScreen('home') },
+          { text: t.save, onPress: handleSaveAndExit },
+        ]);
+      }
+    } else {
+      setScreen('home');
+    }
+  };
+
+  // Track game over
+  useEffect(() => {
+    if (gameOver) setGameDuration(Math.floor((Date.now() - gameStartTime.current) / 1000));
   }, [gameOver]);
 
-  // Remove finished floating scores
+  useEffect(() => {
+    if (gameOver && !prevGameOver.current) {
+      const highestTile = tiles.reduce((max, ti) => Math.max(max, ti.value), 0);
+      recordGame(score, highestTile);
+      // Delete from saved slot since game is over
+      if (activeSlot >= 0) deleteGame(activeSlot);
+    }
+    prevGameOver.current = gameOver;
+  }, [gameOver, score, tiles, recordGame, activeSlot, deleteGame]);
+
   const removeFloating = useCallback((id: number) => {
     setFloatingScores((prev) => prev.filter((f) => f.id !== id));
   }, []);
 
-  // Reset all persisted data
   const handleResetAll = useCallback(() => {
     resetStats();
     resetBestScore();
   }, [resetStats, resetBestScore]);
 
-  // First launch tutorial
-  useEffect(() => {
-    if (!settings.hasSeenTutorial) {
-      setShowTutorial(true);
-      updateSettings({ hasSeenTutorial: true });
-    }
-  }, [settings.hasSeenTutorial, updateSettings]);
-
-  // Record game stats on game over
-  useEffect(() => {
-    if (gameOver && !prevGameOver.current) {
-      const highestTile = tiles.reduce((max, t) => Math.max(max, t.value), 0);
-      recordGame(score, highestTile);
-    }
-    prevGameOver.current = gameOver;
-  }, [gameOver, score, tiles, recordGame]);
-
   const scoreAnimStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: scoreShake.value },
-      { scale: scoreScale.value },
-    ],
+    transform: [{ translateX: scoreShake.value }, { scale: scoreScale.value }],
   }));
 
   const boardShakeStyle = useAnimatedStyle(() => ({
@@ -115,10 +180,8 @@ export default function GameScreen() {
   useEffect(() => {
     if (score > 0) {
       scoreShake.value = withSequence(
-        withTiming(7, { duration: 55 }),
-        withTiming(-7, { duration: 55 }),
-        withTiming(4, { duration: 45 }),
-        withTiming(0, { duration: 40 })
+        withTiming(7, { duration: 55 }), withTiming(-7, { duration: 55 }),
+        withTiming(4, { duration: 45 }), withTiming(0, { duration: 40 })
       );
       scoreScale.value = withSequence(
         withTiming(1.12, { duration: 80 }),
@@ -136,15 +199,12 @@ export default function GameScreen() {
     if (!result.changed) {
       haptic(() => Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error));
       boardShake.value = withSequence(
-        withTiming(-10, { duration: 55 }),
-        withTiming(10, { duration: 55 }),
-        withTiming(-6, { duration: 45 }),
-        withTiming(6, { duration: 45 }),
+        withTiming(-10, { duration: 55 }), withTiming(10, { duration: 55 }),
+        withTiming(-6, { duration: 45 }), withTiming(6, { duration: 45 }),
         withTiming(0, { duration: 35 })
       );
     } else if (result.merged) {
       haptic(() => Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy));
-      // Floating score popup
       if (result.scoreGained > 0) {
         const id = ++floatingIdRef.current;
         setFloatingScores((prev) => [...prev, { id, value: result.scoreGained }]);
@@ -159,7 +219,6 @@ export default function GameScreen() {
     setFloatingScores([]);
     gameStartTime.current = Date.now();
     setGameDuration(0);
-    // Board entry animation
     boardOpacity.value = 0;
     boardOpacity.value = withDelay(100, withTiming(1, { duration: 400, easing: Easing.out(Easing.cubic) }));
     restart();
@@ -168,18 +227,12 @@ export default function GameScreen() {
   const handleRestart = () => {
     if (score > 0 && !gameOver) {
       if (Platform.OS === 'web') {
-        if (confirm('Mevcut oyunu bitirmek istediğine emin misin?')) {
-          doRestart();
-        }
+        if (confirm(t.restartConfirmMsg)) doRestart();
       } else {
-        Alert.alert(
-          'Yeni Oyun',
-          'Mevcut oyunu bitirmek istediğine emin misin?',
-          [
-            { text: 'İptal', style: 'cancel' },
-            { text: 'Evet', onPress: doRestart },
-          ]
-        );
+        Alert.alert(t.restartConfirmTitle, t.restartConfirmMsg, [
+          { text: t.cancel, style: 'cancel' },
+          { text: t.yes, onPress: doRestart },
+        ]);
       }
     } else {
       doRestart();
@@ -202,70 +255,115 @@ export default function GameScreen() {
     setShowSettings(true);
   };
 
+  // Web keyboard support
+  useEffect(() => {
+    if (Platform.OS !== 'web' || screen !== 'game') return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const keyMap: Record<string, Direction> = {
+        ArrowLeft: 'left', ArrowRight: 'right', ArrowUp: 'up', ArrowDown: 'down',
+      };
+      const dir = keyMap[e.key];
+      if (dir) { e.preventDefault(); handleSwipe(dir); }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSwipe, screen]);
+
   const shadowStyle = Platform.select({
-    ios: {
-      shadowColor: theme.scoreCardShadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 1,
-      shadowRadius: 8,
-    },
+    ios: { shadowColor: theme.scoreCardShadow, shadowOffset: { width: 0, height: 2 }, shadowOpacity: 1, shadowRadius: 8 },
     android: { elevation: 3 },
     web: { boxShadow: `0px 2px 8px ${theme.scoreCardShadow}` },
   });
 
-  // Web keyboard support (arrow keys)
-  useEffect(() => {
-    if (Platform.OS !== 'web') return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const keyMap: Record<string, Direction> = {
-        ArrowLeft: 'left',
-        ArrowRight: 'right',
-        ArrowUp: 'up',
-        ArrowDown: 'down',
-      };
-      const dir = keyMap[e.key];
-      if (dir) {
-        e.preventDefault();
-        handleSwipe(dir);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSwipe]);
+  // ─── Onboarding ───
+  if (showOnboarding) {
+    return (
+      <OnboardingModal
+        visible
+        theme={theme}
+        selectedLanguage={settings.language ?? 'tr'}
+        onSelectLanguage={(lang: Language) => updateSettings({ language: lang })}
+        onComplete={handleOnboardingComplete}
+      />
+    );
+  }
 
+  // ─── Home Screen ───
+  if (screen === 'home') {
+    return (
+      <>
+        <HomeScreen
+          theme={theme}
+          isDark={isDark}
+          bestScore={bestScore}
+          slots={slots}
+          onNewGame={startNewGame}
+          onContinueGame={continueGame}
+          onDeleteGame={deleteGame}
+          onOpenSettings={handleSettings}
+        />
+        <SettingsModal
+          visible={showSettings}
+          onClose={() => setShowSettings(false)}
+          theme={theme}
+          stats={stats}
+          onResetStats={handleResetAll}
+        />
+      </>
+    );
+  }
+
+  // ─── Game Screen ───
   return (
-    <View
-      style={[
-        styles.container,
-        { paddingTop: topInset, paddingBottom: bottomInset, backgroundColor: theme.background },
-      ]}
-    >
-      <StatusBar style={settings.theme === 'dark' ? 'light' : 'dark'} />
+    <View style={[styles.container, { paddingTop: topInset, paddingBottom: bottomInset, backgroundColor: theme.background }]}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+
       <View style={styles.header}>
-        <View style={styles.titleBlock}>
+        <View style={styles.titleRow}>
+          <Pressable
+            onPress={handleBackToMenu}
+            style={({ pressed }) => [
+              styles.backBtn,
+              { backgroundColor: theme.scoreCard, opacity: pressed ? 0.72 : 1 },
+              shadowStyle,
+            ]}
+            accessibilityLabel={t.backToMenu}
+          >
+            <Ionicons name="chevron-back" size={20} color={theme.textSecondary} />
+          </Pressable>
+
           <Text style={[styles.title, { color: theme.textPrimary }]}>fibo</Text>
-          <Text style={[styles.subtitle, { color: theme.textMuted }]}>ardışık sayıları birleştir</Text>
         </View>
 
         <View style={styles.headerRight}>
           <Animated.View style={[styles.scoreCard, { backgroundColor: theme.scoreCard }, shadowStyle, scoreAnimStyle]}>
-            <Text style={[styles.scoreLabel, { color: theme.textMuted }]}>SKOR</Text>
+            <Text style={[styles.scoreLabel, { color: theme.textMuted }]}>{t.scoreLabel}</Text>
             <AnimatedScore value={score} style={[styles.scoreValue, { color: theme.textPrimary }]} />
-            {/* Floating scores anchored to score card */}
             {floatingScores.map((f) => (
               <FloatingScore key={f.id} id={f.id} value={f.value} onDone={removeFloating} />
             ))}
           </Animated.View>
 
           <View style={[styles.scoreCard, { backgroundColor: theme.scoreCard }, shadowStyle]}>
-            <Text style={[styles.scoreLabel, { color: theme.textMuted }]}>EN İYİ</Text>
+            <Text style={[styles.scoreLabel, { color: theme.textMuted }]}>{t.bestLabel}</Text>
             <Text style={[styles.scoreValue, { color: theme.textPrimary }]}>{bestScore}</Text>
           </View>
         </View>
       </View>
 
-      {/* Action buttons row */}
       <View style={styles.actionRow}>
+        <Pressable
+          onPress={handleSaveAndExit}
+          style={({ pressed }) => [
+            styles.actionBtn,
+            { backgroundColor: theme.scoreCard, opacity: pressed ? 0.72 : 1 },
+            shadowStyle,
+          ]}
+          accessibilityLabel={t.saveAndExit}
+        >
+          <Ionicons name="save-outline" size={17} color={theme.textSecondary} />
+        </Pressable>
+
         <Pressable
           onPress={handleUndo}
           style={({ pressed }) => [
@@ -274,8 +372,7 @@ export default function GameScreen() {
             shadowStyle,
           ]}
           disabled={!canUndo}
-          accessibilityLabel="Geri al"
-          accessibilityRole="button"
+          accessibilityLabel={t.undoLabel}
         >
           <Ionicons name="arrow-undo" size={17} color={theme.textSecondary} />
         </Pressable>
@@ -287,23 +384,9 @@ export default function GameScreen() {
             { backgroundColor: theme.scoreCard, opacity: pressed ? 0.72 : 1 },
             shadowStyle,
           ]}
-          accessibilityLabel="Nasıl oynanır"
-          accessibilityRole="button"
+          accessibilityLabel={t.howToPlayLabel}
         >
           <Ionicons name="help" size={18} color={theme.textSecondary} />
-        </Pressable>
-
-        <Pressable
-          onPress={handleSettings}
-          style={({ pressed }) => [
-            styles.actionBtn,
-            { backgroundColor: theme.scoreCard, opacity: pressed ? 0.72 : 1 },
-            shadowStyle,
-          ]}
-          accessibilityLabel="Ayarlar"
-          accessibilityRole="button"
-        >
-          <Ionicons name="settings-outline" size={18} color={theme.textSecondary} />
         </Pressable>
 
         <Pressable
@@ -312,8 +395,7 @@ export default function GameScreen() {
             styles.restartBtn,
             { backgroundColor: theme.restartBtn, opacity: pressed ? 0.75 : 1, transform: [{ scale: pressed ? 0.93 : 1 }] },
           ]}
-          accessibilityLabel="Yeni oyun"
-          accessibilityRole="button"
+          accessibilityLabel={t.newGameLabel}
         >
           <Ionicons name="refresh" size={20} color={theme.restartBtnText} />
         </Pressable>
@@ -333,10 +415,11 @@ export default function GameScreen() {
         <GameOverOverlay
           score={score}
           bestScore={bestScore}
-          highestTile={tiles.reduce((max, t) => Math.max(max, t.value), 0)}
+          highestTile={tiles.reduce((max, ti) => Math.max(max, ti.value), 0)}
           moveCount={moveCount}
           gameDuration={gameDuration}
           onPlayAgain={doRestart}
+          onBackToMenu={() => setScreen('home')}
           theme={theme}
         />
       )}
@@ -346,103 +429,30 @@ export default function GameScreen() {
         onClose={() => setShowTutorial(false)}
         theme={theme}
       />
-
-      <SettingsModal
-        visible={showSettings}
-        onClose={() => setShowSettings(false)}
-        theme={theme}
-        stats={stats}
-        onResetStats={handleResetAll}
-      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-  },
+  container: { flex: 1, alignItems: 'center' },
   header: {
-    width: '100%',
-    paddingHorizontal: 16,
-    paddingTop: 14,
-    paddingBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    width: '100%', paddingHorizontal: 16, paddingTop: 14, paddingBottom: 10,
+    flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between',
   },
-  titleBlock: {
-    gap: 2,
-    justifyContent: 'center',
-  },
-  title: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 32,
-    letterSpacing: -1.2,
-  },
-  subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 11,
-    letterSpacing: 0.3,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-  },
-  scoreCard: {
-    borderRadius: 14,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    alignItems: 'center',
-    minWidth: 60,
-  },
-  scoreLabel: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 9,
-    letterSpacing: 1.2,
-  },
-  scoreValue: {
-    fontFamily: 'Inter_700Bold',
-    fontSize: 20,
-    letterSpacing: -0.5,
-  },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  backBtn: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  title: { fontFamily: 'Inter_700Bold', fontSize: 28, letterSpacing: -1.2 },
+  headerRight: { flexDirection: 'row', alignItems: 'center', gap: 7 },
+  scoreCard: { borderRadius: 14, paddingHorizontal: 14, paddingVertical: 8, alignItems: 'center', minWidth: 60 },
+  scoreLabel: { fontFamily: 'Inter_600SemiBold', fontSize: 9, letterSpacing: 1.2 },
+  scoreValue: { fontFamily: 'Inter_700Bold', fontSize: 20, letterSpacing: -0.5 },
   actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-    alignSelf: 'flex-end',
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingHorizontal: 16, paddingBottom: 8, alignSelf: 'flex-end',
   },
-  actionBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  restartBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 11,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  boardWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-  },
-  hintRow: {
-    paddingBottom: 18,
-    paddingTop: 10,
-  },
-  hintText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    letterSpacing: 0.2,
-  },
+  actionBtn: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  restartBtn: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' },
+  boardWrapper: { flex: 1, justifyContent: 'center', alignItems: 'center', width: '100%' },
+  hintRow: { paddingBottom: 18, paddingTop: 10 },
+  hintText: { fontFamily: 'Inter_400Regular', fontSize: 12, letterSpacing: 0.2 },
 });
